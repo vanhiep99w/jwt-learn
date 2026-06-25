@@ -3,7 +3,9 @@
   "pages": [
     "token-creation-flow",
     "token-validation-flow",
+    "token-validation-deep-dive",
     "header-payload-signature",
+    "signature-deep-dive",
     "time-based-claims",
     "audience-issuer-subject"
   ]
