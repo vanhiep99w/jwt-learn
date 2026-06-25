@@ -7,7 +7,7 @@ description: "Mổ xẻ chi tiết toàn bộ pipeline verify một JWT — tác
 
 ## Mục lục
 
-- [Bối cảnh: Token hết hạn vẫn lọt, token hợp lệ lại bị chặn](#1-bối-cảnh-token-hết-hạn-vẫn-lọt-token-hợp-lệ-lại-bị-chặn)
+- ["Verify token" không phải một bước, mà là sáu](#1-verify-token-không-phải-một-bước-mà-là-sáu)
 - [Toàn cảnh pipeline verify — 6 cổng](#2-toàn-cảnh-pipeline-verify--6-cổng)
 - [Bước 1: Tách & decode — chưa tin gì cả](#3-bước-1-tách--decode--chưa-tin-gì-cả)
 - [Bước 2: Allowlist thuật toán — cổng sống còn](#4-bước-2-allowlist-thuật-toán--cổng-sống-còn)
@@ -23,17 +23,19 @@ description: "Mổ xẻ chi tiết toàn bộ pipeline verify một JWT — tác
 
 ---
 
-## 1. Bối cảnh: Token hết hạn vẫn lọt, token hợp lệ lại bị chặn
+## 1. "Verify token" không phải một bước, mà là sáu
 
-Hai sự cố thật, cùng một gốc rễ là **verify sai pipeline**:
+Hỏi nhanh mười lập trình viên "verify một JWT là làm gì", chín người trả lời "check chữ ký". Đó chính là lý do phần lớn lỗ hổng JWT **không** nằm ở chữ ký — mà nằm ở những bước **bị quên** quanh nó.
 
-**Sự cố A — token hết hạn vẫn được chấp nhận.** Một service tự viết hàm "verify nhanh": tách token, decode payload, check chữ ký. Nhưng quên check `exp`. Kết quả: một token rò rỉ từ 3 tháng trước vẫn dùng được — kẻ tấn công đăng nhập bằng token cũ.
+Verify thực ra là một **chuỗi cổng**, mỗi cổng từ chối token vì một lý do khác nhau — và bỏ sót bất kỳ cổng nào cũng là một lỗ hổng độc lập. Hai sự cố kinh điển, cùng gốc "verify thiếu cổng", ở hai thái cực ngược nhau:
 
-**Sự cố B — token hợp lệ bị chặn hàng loạt lúc 0h.** Một service khác verify rất chặt, nhưng đồng hồ server lệch 40 giây so với Auth Server. Token vừa phát ra có `nbf` (not before) ở tương lai gần → service coi là "chưa hiệu lực" → 401 hàng loạt mỗi khi deploy.
+**Quên một cổng → token chết vẫn sống.** Một service tự viết hàm "verify nhanh": tách token, decode payload, check chữ ký — nhưng quên `exp`. Một token rò rỉ từ 3 tháng trước vẫn đăng nhập được.
+
+**Siết một cổng quá tay → chặn nhầm người thật.** Một service khác verify rất chặt nhưng đồng hồ lệch 40 giây so với Auth Server. Token vừa phát có `nbf` (not before) ở tương lai gần → service coi là "chưa hiệu lực" → 401 hàng loạt mỗi lần deploy.
 
 ```diagram
-Sự cố A: verify chữ ký ✓  nhưng KHÔNG check exp  → token chết vẫn sống
-Sự cố B: verify chữ ký ✓, check nbf ✓  nhưng KHÔNG có leeway  → lệch giờ = chặn nhầm
+Quên cổng:    verify chữ ký ✓  nhưng KHÔNG check exp  → token chết vẫn sống
+Siết quá tay: verify chữ ký ✓, check nbf ✓  nhưng KHÔNG có leeway  → lệch giờ = chặn nhầm
 ```
 
 > [!IMPORTANT]
