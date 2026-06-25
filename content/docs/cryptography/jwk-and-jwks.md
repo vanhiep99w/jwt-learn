@@ -108,10 +108,10 @@ Các field phụ thuộc vào `kty`:
 ```diagram
 RSA  (kty="RSA")                 EC  (kty="EC")                 EdDSA (kty="OKP")
 ┌────────────────────┐          ┌────────────────────┐         ┌────────────────────┐
-│ "kty": "RSA"        │          │ "kty": "EC"         │         │ "kty": "OKP"        │
-│ "n": "<modulus>"    │          │ "crv": "P-256"      │         │ "crv": "Ed25519"    │
-│ "e": "AQAB"         │          │ "x": "<toạ độ x>"   │         │ "x": "<public key>" │
-│                     │          │ "y": "<toạ độ y>"   │         │                     │
+│ "kty": "RSA"       │          │ "kty": "EC"        │         │ "kty": "OKP"       │
+│ "n": "<modulus>"   │          │ "crv": "P-256"     │         │ "crv": "Ed25519"   │
+│ "e": "AQAB"        │          │ "x": "<toạ độ x>"  │         │ "x": "<public key>"│
+│                    │          │ "y": "<toạ độ y>"  │         │                    │
 └────────────────────┘          └────────────────────┘         └────────────────────┘
  modulus n + exponent e          điểm (x, y) trên đường cong     1 toạ độ nén (chỉ x)
 ```
@@ -350,20 +350,20 @@ REFETCH BÃO HÒA: attacker gửi hàng loạt token với kid ngẫu nhiên (kh
 ```
 
 ```diagram
-   ┌─ request đến ─┐
-   │  đọc kid       │
-   │  kid ∈ cache?  │── có ──▶ verify luôn
-   │      │ không            
-   │      ▼                  
-   │  đã refetch trong cooldown gần đây?  ── có ──▶ REJECT (không refetch nữa)
-   │      │ chưa
-   │      ▼
-   │  refetch JWKS (có điều kiện ETag)
-   │  kid ∈ cache mới? ── có ──▶ verify
-   │      │ không
-   │      ▼
-   │   REJECT (fail-closed)
-   └────────────────┘
+   ┌─ request đến ──────────────────────────────────────────────────────────────┐
+   │  đọc kid                                                                   │
+   │  kid ∈ cache?  │── có ──▶ verify luôn                                      │
+   │      │ không                                                               │
+   │      ▼                                                                     │
+   │  đã refetch trong cooldown gần đây?  ── có ──▶ REJECT (không refetch nữa)  │
+   │      │ chưa                                                                │
+   │      ▼                                                                     │
+   │  refetch JWKS (có điều kiện ETag)                                          │
+   │  kid ∈ cache mới? ── có ──▶ verify                                         │
+   │      │ không                                                               │
+   │      ▼                                                                     │
+   │   REJECT (fail-closed)                                                     │
+   └────────────────────────────────────────────────────────────────────────────┘
 ```
 
 > [!TIP]
@@ -551,14 +551,14 @@ curl -s https://www.googleapis.com/oauth2/v3/certs | jq '.keys[] | {kid, kty, al
 ## 14. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
-│  JWK  = một public key dạng JSON, tự mô tả                    │
-│         kty (RSA→n,e | EC→crv,x,y | OKP→crv,x | oct→k=SECRET) │
-│         + kid, use="sig", alg                                 │
+╭────────────────────────────────────────────────────────────────╮
+│  JWK  = một public key dạng JSON, tự mô tả                     │
+│         kty (RSA→n,e | EC→crv,x,y | OKP→crv,x | oct→k=SECRET)  │
+│         + kid, use="sig", alg                                  │
 │                                                                │
-│  MÃ HÓA SỐ (unsigned big-endian, base64url):                  │
-│     RSA n : minimal-unsigned — BỎ byte 0x00 đầu (khác DER!)   │
-│     EC x,y: fixed-length — THÊM 0x00 đầu cho đủ 32B (P-256)   │
+│  MÃ HÓA SỐ (unsigned big-endian, base64url):                   │
+│     RSA n : minimal-unsigned — BỎ byte 0x00 đầu (khác DER!)    │
+│     EC x,y: fixed-length — THÊM 0x00 đầu cho đủ 32B (P-256)    │
 │     e = 65537 = "AQAB"                                         │
 │                                                                │
 │  JWKS = { "keys": [ JWK, ... ] } qua HTTPS tại jwks_uri cố định│
@@ -568,12 +568,12 @@ curl -s https://www.googleapis.com/oauth2/v3/certs | jq '.keys[] | {kid, kty, al
 │          cache theo Cache-Control/ETag; refetch khi kid lạ;    │
 │          cooldown + jitter; không thấy → REJECT (fail-closed)  │
 │                                                                │
-│  THUMBPRINT (RFC 7638): canonical JSON 4 field → SHA-256 → b64url │
+│THUMBPRINT (RFC 7638): canonical JSON 4 field → SHA-256 → b64url│
 │                                                                │
-│  TIN CẬY: khóa CHỈ từ jwks_uri cấu hình sẵn.                  │
+│  TIN CẬY: khóa CHỈ từ jwks_uri cấu hình sẵn.                   │
 │           BỎ QUA jku / jwk / x5u / x5c-tự-khai trong token.    │
 │           JWKS công khai KHÔNG chứa khóa oct (HMAC).           │
-╰──────────────────────────────────────────────────────────────╯
+╰────────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**

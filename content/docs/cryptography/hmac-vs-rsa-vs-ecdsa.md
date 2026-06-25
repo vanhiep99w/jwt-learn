@@ -58,7 +58,7 @@ Mọi thuật toán ký JWT rơi vào đúng một trong hai thế giới:
    Verify: HMAC(K, data) == tag   ← cần CHÍNH secret K → verify được thì cũng ký được
 
 BẤT ĐỐI XỨNG (asymmetric) — RSA: RS*/PS*  |  EC: ES*  |  EdDSA
-   ┌──────────────┐   private key d        public key e   ┌──────────────┐
+   ┌──────────────┐   private key d        public key e    ┌──────────────┐
    │   Người ký   │── ký bằng d ──▶ token ──▶ verify bằng e│  Người verify│
    └──────────────┘   (giữ tuyệt mật)      (công khai)     └──────────────┘
    Ký:    sig = Sign(privKey, data)        ← chỉ ai có privKey mới ký được
@@ -564,27 +564,27 @@ openssl pkey -in ed-private.pem -pubout -out ed-public.pem
 ## 13. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
-│  CÂU HỎI GỐC:  có nhiều bên VERIFY khác nhau không?           │
-│                                                                │
-│  KHÔNG → HS256   (đối xứng, nhanh, secret ≥32B ngẫu nhiên)    │
-│  CÓ    → bất đối xứng (private ký / public verify):           │
-│            • RS256  — tương thích rộng nhất (OIDC)            │
-│            • PS256  — RSA padding hiện đại (chọn mới)         │
-│            • ES256  — token gọn, cân bằng hiệu năng           │
-│            • EdDSA  — an toàn-mặc-định, không lo RNG          │
-│                                                                │
-│  RUỘT:   RSA  = mᵈ mod n (ký) / sᵉ mod n (verify), e nhỏ→verify nhanh │
-│          EC   = Q=d·G; ký dùng nonce k (k lặp = lộ d!)        │
-│          HMAC = 2 vòng băm, chặn length-extension, là PRF     │
-│                                                                │
-│  Tương đương an toàn:  EC-256 ≈ RSA-3072 (128-bit)           │
-│       (EC phá bằng Pollard rho — mũ; RSA bằng GNFS — dưới mũ) │
-│  Kích thước chữ ký:    HS(32) < ES/EdDSA(64) ≪ RS(256+)      │
-│  Hiệu năng: RSA ký chậm/verify nhanh; EC/EdDSA cân bằng.      │
-│                                                                │
-│  LUÔN: ghim algorithms=[...]; constant-time compare; ký ≠ mã hóa │
-╰──────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────╮
+│  CÂU HỎI GỐC:  có nhiều bên VERIFY khác nhau không?                  │
+│                                                                      │
+│  KHÔNG → HS256   (đối xứng, nhanh, secret ≥32B ngẫu nhiên)           │
+│  CÓ    → bất đối xứng (private ký / public verify):                  │
+│            • RS256  — tương thích rộng nhất (OIDC)                   │
+│            • PS256  — RSA padding hiện đại (chọn mới)                │
+│            • ES256  — token gọn, cân bằng hiệu năng                  │
+│            • EdDSA  — an toàn-mặc-định, không lo RNG                 │
+│                                                                      │
+│  RUỘT:   RSA  = mᵈ mod n (ký) / sᵉ mod n (verify), e nhỏ→verify nhanh│
+│          EC   = Q=d·G; ký dùng nonce k (k lặp = lộ d!)               │
+│          HMAC = 2 vòng băm, chặn length-extension, là PRF            │
+│                                                                      │
+│  Tương đương an toàn:  EC-256 ≈ RSA-3072 (128-bit)                   │
+│       (EC phá bằng Pollard rho — mũ; RSA bằng GNFS — dưới mũ)        │
+│  Kích thước chữ ký:    HS(32) < ES/EdDSA(64) ≪ RS(256+)              │
+│  Hiệu năng: RSA ký chậm/verify nhanh; EC/EdDSA cân bằng.             │
+│                                                                      │
+│  LUÔN: ghim algorithms=[...]; constant-time compare; ký ≠ mã hóa     │
+╰──────────────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**

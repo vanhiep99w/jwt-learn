@@ -313,26 +313,26 @@ async function issueRefreshToken(user, sessionId) {
 ## 11. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
+╭────────────────────────────────────────────────────────────────╮
 │  CẤP TOKEN = đóng dấu danh tính (đã xác thực) thành claim ký   │
 │                                                                │
 │  PIPELINE:  xác thực → phân quyền (quyền HIỆN HÀNH) →          │
-│             dựng claims (tối thiểu) → kid active → ký → trả     │
+│             dựng claims (tối thiểu) → kid active → ký → trả    │
 │                                                                │
 │  CLAIMS:  iss/sub/aud/iat/exp/jti + scope/roles (tối thiểu)    │
 │     sub = id (không PII) ; KHÔNG nhét secret/PII/dữ liệu lớn   │
 │                                                                │
-│  TTL:   access 5–15' | id 5–60' | refresh ngày–tuần (opaque)  │
+│  TTL:   access 5–15' | id 5–60' | refresh ngày–tuần (opaque)   │
 │         ngắn = blast radius nhỏ + revoke nhanh + overlap nhỏ   │
 │                                                                │
-│  FIELD VẬN HÀNH:                                              │
-│     jti (CSPRNG) → revoke/log/anti-replay                     │
+│  FIELD VẬN HÀNH:                                               │
+│     jti (CSPRNG) → revoke/log/anti-replay                      │
 │     kid (header) → trỏ JWKS → xoay khóa không downtime         │
-│     iat → tuổi token + "logout mọi thiết bị trước T"          │
+│     iat → tuổi token + "logout mọi thiết bị trước T"           │
 │                                                                │
 │  CẶP: access (JWT ngắn, gọi API) + refresh (opaque dài, revoke)│
-│  Issuer CỐ ĐỊNH alg + TTL — không để client chọn.             │
-╰──────────────────────────────────────────────────────────────╯
+│  Issuer CỐ ĐỊNH alg + TTL — không để client chọn.              │
+╰────────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**

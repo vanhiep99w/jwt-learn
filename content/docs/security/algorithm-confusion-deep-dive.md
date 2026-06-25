@@ -111,22 +111,22 @@ Hệ thống bình thường (RS256):
 Kẻ tấn công khai thác sự thật: **public key là thứ ai cũng lấy được**, và nếu server lấy `alg` từ header thì:
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
-│ Bước khai thác:                                                │
-│                                                                │
-│ 1. Lấy PUBLIC_KEY của server (từ /jwks.json, /cert, ...)       │
+╭─────────────────────────────────────────────────────────────────╮
+│ Bước khai thác:                                                 │
+│                                                                 │
+│ 1. Lấy PUBLIC_KEY của server (từ /jwks.json, /cert, ...)        │
 │    dưới dạng chuỗi PEM:                                         │
 │       -----BEGIN PUBLIC KEY-----\nMIIB...\n-----END...-----     │
-│                                                                │
-│ 2. Tạo token mới:                                              │
+│                                                                 │
+│ 2. Tạo token mới:                                               │
 │       header  = {"alg":"HS256",...}   ← đổi RS256 thành HS256   │
-│       payload = {"role":"admin",...}                           │
-│                                                                │
-│ 3. Ký HMAC-SHA256, dùng CHÍNH chuỗi PEM public key làm secret: │
-│       sig = HMAC_SHA256(key = PUBLIC_KEY_PEM, signingInput)    │
-│                                                                │
-│ 4. Gửi token lên server.                                       │
-╰──────────────────────────────────────────────────────────────╯
+│       payload = {"role":"admin",...}                            │
+│                                                                 │
+│ 3. Ký HMAC-SHA256, dùng CHÍNH chuỗi PEM public key làm secret:  │
+│       sig = HMAC_SHA256(key = PUBLIC_KEY_PEM, signingInput)     │
+│                                                                 │
+│ 4. Gửi token lên server.                                        │
+╰─────────────────────────────────────────────────────────────────╯
 ```
 
 Phía server, nếu code đại loại `verify(token, publicKey)` mà **lấy alg = HS256 từ header**:
@@ -284,28 +284,28 @@ Phòng thủ kid:
 ## 9. Phòng thủ — checklist từng tầng
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
-│ TẦNG 1 — Khóa thuật toán (chặn alg:none & confusion)          │
-│   ✅ verify(..., { algorithms: ['RS256'] })  tường minh        │
-│   ✅ Reject mọi alg ngoài allowlist (kể cả "none"/"None")      │
-│                                                                │
-│ TẦNG 2 — Tách & ghim khóa                                     │
-│   ✅ Mỗi khóa phục vụ đúng một thuật toán                      │
-│   ✅ Public key KHÔNG bao giờ bị dùng làm HMAC secret          │
-│   ✅ Dùng KeyObject đúng kiểu, không phải chuỗi PEM mơ hồ      │
-│                                                                │
-│ TẦNG 3 — Nguồn khóa                                           │
-│   ✅ Chỉ dùng JWKS URL cố định cấu hình sẵn                    │
-│   ✅ BỎ QUA header jku / x5u / jwk khi verify                  │
-│                                                                │
-│ TẦNG 4 — kid an toàn                                          │
-│   ✅ Validate format kid; tra khóa bằng map/param query        │
-│   ✅ kid lạ → reject, không fallback                           │
-│                                                                │
-│ TẦNG 5 — Vận hành                                             │
+╭─────────────────────────────────────────────────────────────────╮
+│ TẦNG 1 — Khóa thuật toán (chặn alg:none & confusion)            │
+│   ✅ verify(..., { algorithms: ['RS256'] })  tường minh         │
+│   ✅ Reject mọi alg ngoài allowlist (kể cả "none"/"None")       │
+│                                                                 │
+│ TẦNG 2 — Tách & ghim khóa                                       │
+│   ✅ Mỗi khóa phục vụ đúng một thuật toán                       │
+│   ✅ Public key KHÔNG bao giờ bị dùng làm HMAC secret           │
+│   ✅ Dùng KeyObject đúng kiểu, không phải chuỗi PEM mơ hồ       │
+│                                                                 │
+│ TẦNG 3 — Nguồn khóa                                             │
+│   ✅ Chỉ dùng JWKS URL cố định cấu hình sẵn                     │
+│   ✅ BỎ QUA header jku / x5u / jwk khi verify                   │
+│                                                                 │
+│ TẦNG 4 — kid an toàn                                            │
+│   ✅ Validate format kid; tra khóa bằng map/param query         │
+│   ✅ kid lạ → reject, không fallback                            │
+│                                                                 │
+│ TẦNG 5 — Vận hành                                               │
 │   ✅ Cập nhật thư viện JWT (nhiều CVE đã vá)                    │
-│   ✅ Log & alert khi gặp alg bất thường                        │
-╰──────────────────────────────────────────────────────────────╯
+│   ✅ Log & alert khi gặp alg bất thường                         │
+╰─────────────────────────────────────────────────────────────────╯
 ```
 
 ---
@@ -391,17 +391,17 @@ CVE-2016-10555 (jsonwebtoken)  — chấp nhận khóa sai thuật toán
 ## 12. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
-│  GỐC RỄ:  header (alg, kid, jku, x5u, jwk) do KẺ TẤN CÔNG điền│
-│           → đừng để token quyết định cách nó được verify      │
+╭────────────────────────────────────────────────────────────────╮
+│  GỐC RỄ:  header (alg, kid, jku, x5u, jwk) do KẺ TẤN CÔNG điền │
+│           → đừng để token quyết định cách nó được verify       │
 │                                                                │
 │  alg:none      → bỏ chữ ký        → allowlist, reject none     │
-│  RS256→HS256   → public key thành → ghim algorithms,          │
+│  RS256→HS256   → public key thành → ghim algorithms,           │
 │                  HMAC secret         tách kiểu khóa            │
 │  jku / x5u     → khóa của attacker → JWKS cố định, bỏ header   │
 │  jwk inject    → token self-signed → bỏ qua jwk header         │
 │  kid injection → ép secret/rỗng    → validate + param query    │
-╰──────────────────────────────────────────────────────────────╯
+╰────────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**

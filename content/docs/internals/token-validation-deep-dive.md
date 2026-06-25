@@ -51,23 +51,23 @@ Siết quá tay: verify chữ ký ✓, check nbf ✓  nhưng KHÔNG có leeway  
                   └────────────────┬────────────────────────┘
                                    ▼
                   ┌─────────────────────────────────────────┐
-                  │ 2. Allowlist thuật toán (alg ∈ cho phép?)│  ← chặn none/confusion
+                  │2. Allowlist thuật toán (alg ∈ cho phép?)│  ← chặn none/confusion
                   └────────────────┬────────────────────────┘
                                    ▼
                   ┌─────────────────────────────────────────┐
-                  │ 3. Resolve key (kid → JWKS / key tĩnh)   │
+                  │ 3. Resolve key (kid → JWKS / key tĩnh)  │
                   └────────────────┬────────────────────────┘
                                    ▼
                   ┌─────────────────────────────────────────┐
-                  │ 4. VERIFY CHỮ KÝ  (toàn vẹn + nguồn gốc) │  ← cổng tin cậy
+                  │ 4. VERIFY CHỮ KÝ  (toàn vẹn + nguồn gốc)│  ← cổng tin cậy
                   └────────────────┬────────────────────────┘
                                    ▼ (từ đây mới được TIN payload)
                   ┌─────────────────────────────────────────┐
-                  │ 5. Claims thời gian: exp, nbf, iat       │
+                  │ 5. Claims thời gian: exp, nbf, iat      │
                   └────────────────┬────────────────────────┘
                                    ▼
                   ┌─────────────────────────────────────────┐
-                  │ 6. Claims định danh: aud, iss, sub, jti  │
+                  │ 6. Claims định danh: aud, iss, sub, jti │
                   └────────────────┬────────────────────────┘
                                    ▼
                               ✅ ACCEPTED
@@ -424,19 +424,19 @@ async function authGuard(req, res, next) {
 ## 13. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
+╭───────────────────────────────────────────────────────────────╮
 │  PIPELINE VERIFY (đúng thứ tự):                               │
-│                                                                │
+│                                                               │
 │  1. Tách 3 phần + decode header/payload  (chưa tin gì)        │
 │  2. alg ∈ allowlist server?              (chặn none/confusion)│
 │  3. Resolve key qua kid → JWKS tin cậy   (bỏ qua jku/jwk)     │
-│  4. VERIFY CHỮ KÝ                         ← ranh giới tin cậy  │
-│  ────────────────── từ đây mới TIN payload ──────────────────│
+│  4. VERIFY CHỮ KÝ                         ← ranh giới tin cậy │
+│  ────────────────── từ đây mới TIN payload ────────────────── │
 │  5. exp / nbf / iat   (+ leeway nhỏ cho lệch đồng hồ)         │
 │  6. aud / iss / sub / jti                                     │
-│                                                                │
+│                                                               │
 │  Mọi nhánh lỗi → REJECT (fail-closed)                         │
-╰──────────────────────────────────────────────────────────────╯
+╰───────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**

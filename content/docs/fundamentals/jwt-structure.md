@@ -54,11 +54,11 @@ Mọi JWT (dạng compact) đều có cấu trúc cố định:
 │                        JWT Compact Serialization                       │
 │                                                                        │
 │   HEADER          .        PAYLOAD         .        SIGNATURE          │
-│   (Base64URL)     │        (Base64URL)      │        (Base64URL)        │
-│                   │                         │                          │
-│   eyJhbGci...     .        eyJzdWIi...      .        SflKxwRJ...       │
+│   (Base64URL)     │        (Base64URL)     │        (Base64URL)        │
+│                   │                        │                           │
+│   eyJhbGci...     .        eyJzdWIi...     .        SflKxwRJ...        │
 │                                                                        │
-│   ◄── Phần 1 ──►  ◄── Phần 2 ──────────►  ◄── Phần 3 ──────────►    │
+│   ◄── Phần 1 ──►  ◄── Phần 2 ──────────►  ◄── Phần 3 ──────────►       │
 │   Metadata         Data (claims)            Chữ ký số                  │
 │   (thuật toán,     (user info,              (chứng minh                │
 │    loại token)      thời hạn, ...)           không bị sửa)             │
@@ -117,16 +117,16 @@ Các giá trị phổ biến:
 │                                                                       │
 │  Asymmetric (private key ký, public key verify)                       │
 │  ──────────────────────────────────────────────                       │
-│  RS256 = RSA-PKCS1-v1.5 + SHA-256   ← phổ biến nhất cho microservice │
+│  RS256 = RSA-PKCS1-v1.5 + SHA-256   ← phổ biến nhất cho microservice  │
 │  RS384 / RS512                                                        │
 │  PS256 = RSA-PSS + SHA-256          ← an toàn hơn RS256               │
-│  ES256 = ECDSA + P-256 + SHA-256    ← key nhỏ, nhanh                 │
+│  ES256 = ECDSA + P-256 + SHA-256    ← key nhỏ, nhanh                  │
 │  ES384 / ES512                                                        │
 │  EdDSA = Ed25519 / Ed448            ← mới nhất, nhanh nhất            │
 │                                                                       │
-│  Đặc biệt                                                            │
+│  Đặc biệt                                                             │
 │  ────────                                                             │
-│  none   = KHÔNG ký!                 ← nguy hiểm, xem mục bảo mật     │
+│  none   = KHÔNG ký!                 ← nguy hiểm, xem mục bảo mật      │
 ╰───────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -208,20 +208,20 @@ JWT chia claims thành 3 nhóm:
 
 ```diagram
 ╭───────────────────────────────────────────────────────────────────────╮
-│  1. REGISTERED CLAIMS (RFC 7519 định nghĩa)                          │
+│  1. REGISTERED CLAIMS (RFC 7519 định nghĩa)                           │
 │     ──────────────────                                                │
-│     Tên ngắn (3 ký tự) để tiết kiệm kích thước token.               │
-│     Không bắt buộc, nhưng KHUYẾN NGHỊ MẠNH.                         │
+│     Tên ngắn (3 ký tự) để tiết kiệm kích thước token.                 │
+│     Không bắt buộc, nhưng KHUYẾN NGHỊ MẠNH.                           │
 │                                                                       │
 │  2. PUBLIC CLAIMS                                                     │
 │     ──────────────                                                    │
-│     Tên do cộng đồng/tổ chức đăng ký với IANA.                       │
-│     Ví dụ: "email", "name", "picture" (OpenID Connect).              │
+│     Tên do cộng đồng/tổ chức đăng ký với IANA.                        │
+│     Ví dụ: "email", "name", "picture" (OpenID Connect).               │
 │                                                                       │
 │  3. PRIVATE CLAIMS                                                    │
 │     ───────────────                                                   │
-│     Tên do BẠN tự đặt — thỏa thuận giữa producer và consumer.       │
-│     Ví dụ: "tenant_id", "permissions", "plan".                       │
+│     Tên do BẠN tự đặt — thỏa thuận giữa producer và consumer.         │
+│     Ví dụ: "tenant_id", "permissions", "plan".                        │
 ╰───────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -300,18 +300,18 @@ Signature là kết quả của việc **ký số** (digital signing) lên nội
 
 ```diagram
 ╭─────────────────────────────────────────────────────────────────────╮
-│  Kẻ tấn công muốn sửa role:                                        │
+│  Kẻ tấn công muốn sửa role:                                         │
 │                                                                     │
 │  Token gốc (server ký):                                             │
 │     Header.{"role":"user",...}.Signature_ĐÚNG                       │
 │                                                                     │
-│  Token giả mạo (kẻ tấn công sửa):                                  │
+│  Token giả mạo (kẻ tấn công sửa):                                   │
 │     Header.{"role":"admin",...}.Signature_ĐÚNG    ← vẫn sig cũ!     │
 │                                                                     │
 │  Server verify:                                                     │
-│     sign(Header + Payload_MỚI)  ≠  Signature_CŨ  →  ❌ REJECT      │
+│     sign(Header + Payload_MỚI)  ≠  Signature_CŨ  →  ❌ REJECT       │
 │                                                                     │
-│  Kẻ tấn công KHÔNG THỂ tạo signature mới vì:                       │
+│  Kẻ tấn công KHÔNG THỂ tạo signature mới vì:                        │
 │     → HS256: không biết secret key                                  │
 │     → RS256: không có private key                                   │
 ╰─────────────────────────────────────────────────────────────────────╯
@@ -324,23 +324,23 @@ Quá trình tạo signature cho thuật toán **HS256** (HMAC-SHA256):
 ```diagram
 ╭─────────────────────────────────────────────────────────────────────╮
 │  Input:                                                             │
-│     header_b64  = Base64URL(header_json)   = "eyJhbGci..."         │
-│     payload_b64 = Base64URL(payload_json)  = "eyJzdWIi..."         │
-│     secret      = "my-super-secret-key-256-bit"                    │
+│     header_b64  = Base64URL(header_json)   = "eyJhbGci..."          │
+│     payload_b64 = Base64URL(payload_json)  = "eyJzdWIi..."          │
+│     secret      = "my-super-secret-key-256-bit"                     │
 │                                                                     │
-│  Bước 1: Nối header + payload bằng dấu chấm                        │
+│  Bước 1: Nối header + payload bằng dấu chấm                         │
 │     signing_input = header_b64 + "." + payload_b64                  │
 │                   = "eyJhbGci...eyJzdWIi..."                        │
 │                                                                     │
 │  Bước 2: HMAC-SHA256(secret, signing_input)                         │
 │     → 32 bytes raw hash                                             │
-│     = 49 f9 4a c7 04 49 48 c7 8a 28 5d 90 4f 87 f0 a4              │
-│       c7 89 7f 7e 8f 3a 4e b2 25 5f da 75 0b 2c c3 97              │
+│     = 49 f9 4a c7 04 49 48 c7 8a 28 5d 90 4f 87 f0 a4               │
+│       c7 89 7f 7e 8f 3a 4e b2 25 5f da 75 0b 2c c3 97               │
 │                                                                     │
 │  Bước 3: Base64URL encode hash                                      │
-│     = "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"               │
+│     = "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"                 │
 │                                                                     │
-│  Output: Signature = "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" │
+│  Output: Signature = "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"  │
 ╰─────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -394,7 +394,7 @@ Signing input (ký lên chuỗi NÀY):
 HS256 (Symmetric):
    ┌─────────────┐                     ┌─────────────┐
    │ Auth Server │                     │ API Server  │
-   │  secret=K   │────── JWT ────────▶│  secret=K   │
+   │  secret=K   │────── JWT ────────▶ │  secret=K   │
    │  SIGN(K)    │                     │  VERIFY(K)  │
    └─────────────┘                     └─────────────┘
    Cả hai dùng CÙNG key K.
@@ -403,7 +403,7 @@ HS256 (Symmetric):
 RS256 (Asymmetric):
    ┌─────────────┐                     ┌─────────────┐
    │ Auth Server │                     │ API Server  │
-   │ private_key │────── JWT ────────▶│ public_key  │
+   │ private_key │────── JWT ────────▶ │ public_key  │
    │  SIGN(priv) │                     │ VERIFY(pub) │
    └─────────────┘                     └─────────────┘
    API Server chỉ có public key — không thể giả mạo token.
@@ -644,28 +644,28 @@ Nhiều người nhầm lẫn JWT với JWS, hoặc nghĩ JWT = mã hóa. Thực
 ╭──────────────────────────────────────────────────────────────────────╮
 │                          JOSE Framework                              │
 │                                                                      │
-│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐                │
-│  │     JWT      │   │     JWS     │   │     JWE     │                │
-│  │  RFC 7519    │   │  RFC 7515   │   │  RFC 7516   │                │
-│  │             │   │             │   │             │                │
-│  │ Định dạng    │   │ Ký số       │   │ Mã hóa      │                │
-│  │ claims      │   │ (signed)    │   │ (encrypted) │                │
-│  │             │   │             │   │             │                │
-│  │ "Phong bì"  │   │ "Con dấu"   │   │ "Két sắt"   │                │
-│  └──────┬──────┘   └──────┬──────┘   └──────┬──────┘                │
+│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐                 │
+│  │     JWT     │   │     JWS     │   │     JWE     │                 │
+│  │  RFC 7519   │   │  RFC 7515   │   │  RFC 7516   │                 │
+│  │             │   │             │   │             │                 │
+│  │ Định dạng   │   │ Ký số       │   │ Mã hóa      │                 │
+│  │ claims      │   │ (signed)    │   │ (encrypted) │                 │
+│  │             │   │             │   │             │                 │
+│  │ "Phong bì"  │   │ "Con dấu"   │   │ "Két sắt"   │                 │
+│  └──────┬──────┘   └──────┬──────┘   └──────┬──────┘                 │
 │         │                 │                 │                        │
 │         ▼                 ▼                 ▼                        │
-│  JWT dùng JWS          JWS bảo vệ      JWE bảo vệ                  │
+│  JWT dùng JWS          JWS bảo vệ      JWE bảo vệ                    │
 │  hoặc JWE để           tính toàn vẹn    tính bí mật                  │
 │  truyền claims         (integrity)      (confidentiality)            │
 │                                                                      │
-│  ┌─────────────┐   ┌─────────────┐                                  │
-│  │     JWK     │   │     JWA     │                                  │
-│  │  RFC 7517   │   │  RFC 7518   │                                  │
-│  │             │   │             │                                  │
-│  │ Định dạng    │   │ Danh sách   │                                  │
-│  │ key (JSON)  │   │ thuật toán  │                                  │
-│  └─────────────┘   └─────────────┘                                  │
+│  ┌─────────────┐   ┌─────────────┐                                   │
+│  │     JWK     │   │     JWA     │                                   │
+│  │  RFC 7517   │   │  RFC 7518   │                                   │
+│  │             │   │             │                                   │
+│  │ Định dạng   │   │ Danh sách   │                                   │
+│  │ key (JSON)  │   │ thuật toán  │                                   │
+│  └─────────────┘   └─────────────┘                                   │
 ╰──────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -729,14 +729,14 @@ Encryption (cần key để decrypt):
 
 ```diagram
 ╭────────────────────────────────────────────────────────────────────╮
-│                        JWT STRUCTURE CHEAT SHEET                    │
+│                        JWT STRUCTURE CHEAT SHEET                   │
 │                                                                    │
 │  Token = Base64URL(Header) . Base64URL(Payload) . Base64URL(Sig)   │
 │                                                                    │
 │  HEADER:                                                           │
-│    • JSON: {"alg":"HS256","typ":"JWT"}                              │
+│    • JSON: {"alg":"HS256","typ":"JWT"}                             │
 │    • alg: thuật toán ký (KHÔNG tin mù quáng!)                      │
-│    • kid: key ID (khi có nhiều key)                                 │
+│    • kid: key ID (khi có nhiều key)                                │
 │                                                                    │
 │  PAYLOAD:                                                          │
 │    • JSON chứa claims (thông tin)                                  │
@@ -751,7 +751,7 @@ Encryption (cần key để decrypt):
 │                                                                    │
 │  BASE64URL (không phải Base64):                                    │
 │    • + → -    / → _    Bỏ padding (=)                              │
-│    • An toàn trong URL, header, cookie                              │
+│    • An toàn trong URL, header, cookie                             │
 ╰────────────────────────────────────────────────────────────────────╯
 ```
 

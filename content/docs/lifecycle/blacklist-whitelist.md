@@ -286,13 +286,13 @@ TRÁNH: allowlist TOÀN BỘ access token → mất stateless, đắt, vô ích
 ## 11. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
+╭────────────────────────────────────────────────────────────────╮
 │  DENYLIST  = tin mặc định, chặn ngoại lệ (chứa cái BỊ revoke)  │
 │  ALLOWLIST = nghi mặc định, cho ngoại lệ (chứa cái CÒN sống)   │
 │                                                                │
-│  BỘ NHỚ (1M user):                                            │
-│     denylist access  ≈ số bị revoke (nhỏ, ~100KB)             │
-│     allowlist access ≈ mọi token sống (1M+, ~100MB) ✗ đắt     │
+│  BỘ NHỚ (1M user):                                             │
+│     denylist access  ≈ số bị revoke (nhỏ, ~100KB)              │
+│     allowlist access ≈ mọi token sống (1M+, ~100MB) ✗ đắt      │
 │     allowlist refresh = miễn phí (refresh vốn đã phải lưu)     │
 │                                                                │
 │  TTL ENTRY = exp − now  → denylist KHÔNG BAO GIỜ phình         │
@@ -300,7 +300,7 @@ TRÁNH: allowlist TOÀN BỘ access token → mất stateless, đắt, vô ích
 │                                                                │
 │  HYBRID đúng:  ACCESS → denylist | REFRESH → allowlist         │
 │     (không phải một-chọn-một; mỗi loại token một mô hình)      │
-╰──────────────────────────────────────────────────────────────╯
+╰────────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**

@@ -267,7 +267,7 @@ async function logoutEverywhere(userId) {
 ## 11. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
+╭────────────────────────────────────────────────────────────────╮
 │  JWT stateless = KHÔNG có nút "hủy ngay" sẵn → phải thêm state │
 │                                                                │
 │  4 CHIẾN LƯỢC (stateless → stateful):                          │
@@ -282,7 +282,7 @@ async function logoutEverywhere(userId) {
 │                                                                │
 │  ĐẶT GÁNH NẶNG ở REFRESH (stateful sẵn, revoke rẻ) + TTL ngắn; │
 │  chỉ leo thang lên denylist khi cần hủy access TỨC THÌ.        │
-╰──────────────────────────────────────────────────────────────╯
+╰────────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**

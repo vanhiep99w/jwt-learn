@@ -71,7 +71,7 @@ Một khóa ngừng VERIFY → chỉ khi token CUỐI CÙNG nó từng ký đã 
 Trục thời gian (ví dụ access token sống 15 phút):
 
   Khóa A:  ████████████ KÝ ████████████┐
-                                        └──── vẫn VERIFY (≥15') ────┐ xóa
+                                       └──── vẫn VERIFY (≥15') ────┐ xóa
                                                                     
   Khóa B:                  ┌──── publish vào JWKS trước ────┐
                            └──────────── KÝ ────────────────────────▶
@@ -489,29 +489,29 @@ async function verify(token) {
 ## 14. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
+╭───────────────────────────────────────────────────────────────╮
 │  ROTATE ≠ thay thế tức thời. ROTATE = chuyển tiếp có OVERLAP. │
-│                                                                │
+│                                                               │
 │  Vòng đời khóa:  Pending → Active → Retiring → Retired        │
 │     Pending : trong JWKS, CHƯA ký (đợi lan truyền ≥ MAX TTL)  │
 │     Active  : khóa đang ký (1 khóa duy nhất, là con trỏ kid)  │
 │     Retiring: ngừng ký, VẪN verify token cũ (+ mạng rollback) │
-│     Retired : gỡ khỏi JWKS, hủy private key                  │
-│                                                                │
+│     Retired : gỡ khỏi JWKS, hủy private key                   │
+│                                                               │
 │  2 bất biến:                                                  │
 │     (1) khóa mới VÀO JWKS trước khi ký bằng nó                │
 │     (2) khóa cũ Ở LẠI tới khi token cuối nó ký hết hạn        │
-│                                                                │
+│                                                               │
 │  overlap ≥ max_token_lifetime(mọi loại) + margin              │
 │           margin gồm clock skew + thao tác + lan truyền (MAX  │
 │           cache app + CDN + multi-region)                     │
-│                                                                │
-│  KMS/HSM: private key không export; ký qua API → app lộ ≠ key lộ │
+│                                                               │
+│KMS/HSM: private key không export; ký qua API → app lộ ≠ key lộ│
 │  GIÁM SÁT: metric verify{kid} → gỡ khi ≈0 (data-driven)       │
-│                                                                │
+│                                                               │
 │  Định kỳ → zero-downtime (overlap dài + rollback).            │
-│  Lộ khóa → gỡ NGAY + runbook + revoke refresh (chặn token giả).│
-╰──────────────────────────────────────────────────────────────╯
+│  Lộ khóa → gỡ NGAY + runbook + revoke refresh (chặn token giả)│
+╰───────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**

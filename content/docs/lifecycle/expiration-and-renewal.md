@@ -263,7 +263,7 @@ async function doRefresh() {
 ## 10. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
+╭────────────────────────────────────────────────────────────────╮
 │  exp/nbf/iat = NumericDate (GIÂY từ epoch, KHÔNG mili-giây)    │
 │     cửa sổ hợp lệ = [nbf, exp)                                 │
 │                                                                │
@@ -271,14 +271,14 @@ async function doRefresh() {
 │     leeway 30–60s (chỉ để bù lệch đồng hồ; fix gốc = NTP)      │
 │                                                                │
 │  SLIDING vs ABSOLUTE:                                          │
-│     access  → absolute TTL ngắn (giữ stateless)               │
+│     access  → absolute TTL ngắn (giữ stateless)                │
 │     refresh → sliding (idle) + absolute cap (trần an toàn)     │
 │                                                                │
-│  SILENT REFRESH:  reactive (đợi 401) | proactive (refresh sớm)│
+│  SILENT REFRESH:  reactive (đợi 401) | proactive (refresh sớm) │
 │  ĐUA REFRESH:  single-flight → chỉ 1 lần xoay → khỏi reuse oan │
 │                                                                │
 │  exp giới hạn blast radius theo THỜI GIAN; KHÔNG thay revoke.  │
-╰──────────────────────────────────────────────────────────────╯
+╰────────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**

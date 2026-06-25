@@ -149,17 +149,17 @@ Tức là **hai lần băm lồng nhau**, mỗi lần trộn key theo một padd
 
 ```diagram
 ╭──────────────────────────────────────────────────────────────╮
-│ 1. Chuẩn hóa key K → K' (đúng 64 byte):                       │
-│      • Nếu len(K) > 64  → K' = SHA256(K)  rồi pad 0 cho đủ 64  │
-│      • Nếu len(K) ≤ 64  → pad thêm byte 0x00 cho đủ 64         │
-│                                                                │
-│ 2. Tính inner = SHA256( (K' ⊕ ipad) || SigningInput )         │
-│      → ra 32 byte                                              │
-│                                                                │
-│ 3. Tính outer = SHA256( (K' ⊕ opad) || inner )                │
-│      → ra 32 byte (256 bit) ← đây là chữ ký thô               │
-│                                                                │
-│ 4. signature = base64url(outer)  → ~43 ký tự                  │
+│ 1. Chuẩn hóa key K → K' (đúng 64 byte):                      │
+│      • Nếu len(K) > 64  → K' = SHA256(K)  rồi pad 0 cho đủ 64│
+│      • Nếu len(K) ≤ 64  → pad thêm byte 0x00 cho đủ 64       │
+│                                                              │
+│ 2. Tính inner = SHA256( (K' ⊕ ipad) || SigningInput )        │
+│      → ra 32 byte                                            │
+│                                                              │
+│ 3. Tính outer = SHA256( (K' ⊕ opad) || inner )               │
+│      → ra 32 byte (256 bit) ← đây là chữ ký thô              │
+│                                                              │
+│ 4. signature = base64url(outer)  → ~43 ký tự                 │
 ╰──────────────────────────────────────────────────────────────╯
 ```
 
@@ -200,7 +200,7 @@ Service B (verifier) ── secret S ──▶  verify token
 ### 5.1. Bên trong phép ký RSA
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
+╭────────────────────────────────────────────────────────────────╮
 │ 1. h = SHA256(SigningInput)            → 32 byte               │
 │                                                                │
 │ 2. Bọc h vào cấu trúc DigestInfo (DER) ghi rõ "đây là SHA-256":│
@@ -214,7 +214,7 @@ Service B (verifier) ── secret S ──▶  verify token
 │    signature = m^d mod n     (d = số mũ private, n = modulus)  │
 │                                                                │
 │ 5. base64url(signature)   → với RSA-2048: 256 byte → ~342 ký tự│
-╰──────────────────────────────────────────────────────────────╯
+╰────────────────────────────────────────────────────────────────╯
 ```
 
 ### 5.2. Bên trong phép verify RSA
@@ -449,20 +449,20 @@ const claims = jwt.verify(token, secret, { algorithms: ['HS256'] });
 ## 12. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
+╭───────────────────────────────────────────────────────────────╮
 │  SigningInput = b64url(header) + "." + b64url(payload)        │
 │  signature    = base64url( SIGN(key, SigningInput) )          │
 │  token        = SigningInput + "." + signature                │
-│                                                                │
+│                                                               │
 │  HS256 → HMAC: H(K⊕opad || H(K⊕ipad || m))   [đối xứng]       │
-│  RS256 → m^d mod n, padding PKCS#1 v1.5       [bất đối xứng]   │
+│  RS256 → m^d mod n, padding PKCS#1 v1.5       [bất đối xứng]  │
 │  PS256 → như RS256 nhưng padding PSS (có salt)                │
-│  ES256 → ECDSA P-256, chữ ký = r‖s (64 byte)                 │
+│  ES256 → ECDSA P-256, chữ ký = r‖s (64 byte)                  │
 │  EdDSA → Ed25519, deterministic, chống lỗi implement          │
-│                                                                │
+│                                                               │
 │  Verify HMAC → so sánh CONSTANT-TIME                          │
 │  Verify RSA  → s^e mod n, check padding + hash                │
-╰──────────────────────────────────────────────────────────────╯
+╰───────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**

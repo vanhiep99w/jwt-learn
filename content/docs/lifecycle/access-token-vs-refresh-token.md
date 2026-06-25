@@ -42,10 +42,10 @@ Một token: chọn ngắn HOẶC dài — không thể cả hai.
 ## 2. Hai token, hai vai trò tách bạch
 
 ```diagram
-┌─────────────── ACCESS TOKEN ───────────────┐   ┌────────── REFRESH TOKEN ──────────┐
+┌─────────────── ACCESS TOKEN ────────────────┐   ┌────────── REFRESH TOKEN ───────────┐
 │ Mục đích: gọi API                           │   │ Mục đích: xin ACCESS mới           │
 │ Gửi tới: mọi resource server                │   │ Gửi tới: CHỈ /token của auth server│
-│ Dạng:    JWT (self-contained, verify offline)│  │ Dạng:    opaque (nên thế), lưu store│
+│ Dạng:   JWT (self-contained, verify offline)│   │ Dạng:   opaque (nên thế), lưu store│
 │ TTL:     5–15 phút                          │   │ TTL:     vài ngày–tuần             │
 │ Lưu DB?  KHÔNG (stateless)                  │   │ Lưu DB?  CÓ (hash) → revoke được   │
 │ Lộ thì:  nguy hiểm ≤ TTL (ngắn)             │   │ Lộ thì:  revoke ngay + reuse detect│
@@ -267,22 +267,22 @@ async function handleRefresh(presentedRT) {
 ## 11. Tóm tắt — Cheat sheet
 
 ```diagram
-╭──────────────────────────────────────────────────────────────╮
-│  HAI TOKEN giải mâu thuẫn "an toàn (ngắn) vs tiện (dài)":     │
+╭────────────────────────────────────────────────────────────────╮
+│  HAI TOKEN giải mâu thuẫn "an toàn (ngắn) vs tiện (dài)":      │
 │                                                                │
-│  ACCESS  : JWT, 5–15', gọi API, stateless, verify offline     │
+│  ACCESS  : JWT, 5–15', gọi API, stateless, verify offline      │
 │            lộ → nguy hiểm ≤ TTL → giữ ngắn; nên ở MEMORY       │
 │                                                                │
-│  REFRESH : opaque, ngày–tuần, CHỈ gọi /token, lưu HASH ở store│
+│  REFRESH : opaque, ngày–tuần, CHỈ gọi /token, lưu HASH ở store │
 │            revoke tức thì + ROTATION + REUSE DETECTION         │
 │            nên ở cookie httpOnly+Secure+SameSite (+chống CSRF) │
 │                                                                │
-│  ROTATION: RT1→RT2→RT3... mỗi cái dùng một lần                │
+│  ROTATION: RT1→RT2→RT3... mỗi cái dùng một lần                 │
 │  REUSE DETECT: RT đã rotate bị dùng lại → thu hồi CẢ family    │
 │                                                                │
 │  Opaque cho refresh vì dù sao cũng phải tra store              │
 │     (rotate/revoke/reuse) → "stateless" của JWT vô nghĩa ở đây │
-╰──────────────────────────────────────────────────────────────╯
+╰────────────────────────────────────────────────────────────────╯
 ```
 
 **3 nguyên tắc xương sống:**
