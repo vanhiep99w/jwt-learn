@@ -7,7 +7,7 @@ description: "Mổ xẻ chi tiết cách JWT được ký và verify ở tầng 
 
 ## Mục lục
 
-- [Bối cảnh: Đổi một ký tự trong payload, cả token chết](#1-bối-cảnh-đổi-một-ký-tự-trong-payload-cả-token-chết)
+- [Chữ ký JWT bảo vệ điều gì — và không bảo vệ điều gì](#1-chữ-ký-jwt-bảo-vệ-điều-gì--và-không-bảo-vệ-điều-gì)
 - [Nhắc lại cấu trúc JWS Compact và Signing Input](#2-nhắc-lại-cấu-trúc-jws-compact-và-signing-input)
 - [base64url — vì sao không phải base64 thường](#3-base64url--vì-sao-không-phải-base64-thường)
 - [HS256 — HMAC-SHA256 mổ xẻ từng bước](#4-hs256--hmac-sha256-mổ-xẻ-từng-bước)
@@ -22,30 +22,28 @@ description: "Mổ xẻ chi tiết cách JWT được ký và verify ở tầng 
 
 ---
 
-## 1. Bối cảnh: Đổi một ký tự trong payload, cả token chết
+## 1. Chữ ký JWT bảo vệ điều gì — và không bảo vệ điều gì
 
-Bạn có một access token đang dùng tốt:
+Trước khi mổ xẻ thuật toán, cần gỡ ngay hiểu lầm phổ biến nhất về chữ ký JWT: **chữ ký không mã hóa gì cả.**
 
-```text
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMiLCJyb2xlIjoidXNlciJ9.qFy...kZ4
-```
+Payload của JWT chỉ là JSON được base64url — ai chặn được token cũng đọc được nội dung bằng mắt thường. Chữ ký (phần thứ ba) sinh ra để trả lời đúng **một** câu hỏi: *"token này có đúng do người giữ khóa tạo ra, và chưa bị sửa một bit nào không?"*
 
-Decode phần payload ra, nó là `{"sub":"123","role":"user"}`. Bạn nghĩ: "Đổi `user` thành `admin` là xong, tự nâng quyền." Bạn sửa payload, base64url lại, ghép vào token cũ, gửi lên server:
+Thử nhanh để thấy ranh giới đó. Lấy một token đang dùng tốt, decode payload ra `{"sub":"123","role":"user"}`, đổi `user` thành `admin`, base64url lại rồi gửi lên server:
 
 ```text
 401 Unauthorized — invalid signature
 ```
 
-Chỉ đổi **đúng một từ** trong phần ai cũng đọc được, mà server phát hiện ngay. Vì sao? Vì phần thứ ba của token — **signature** — được tính từ **chính xác từng byte** của header và payload. Đổi 1 bit ở payload → hash đổi hoàn toàn → chữ ký không khớp.
+Chỉ đổi **đúng một từ** trong phần ai cũng đọc được, server phát hiện ngay — vì chữ ký được tính từ **chính xác từng byte** của header và payload, đổi 1 bit là hash đổi hoàn toàn → chữ ký không khớp. Bạn *đọc* được payload, nhưng *sửa* thì không qua mặt được ai.
 
-Nhưng câu hỏi sâu hơn là:
+Từ thí nghiệm nhỏ đó lộ ra ba câu hỏi mà cả doc này sẽ trả lời:
 
 1. Server **tính** chữ ký đó như thế nào — từ byte nào, qua hàm gì?
-2. Tại sao kẻ tấn công **không thể** tự tạo lại chữ ký dù biết thuật toán?
+2. Tại sao kẻ tấn công **không thể** tự tạo lại chữ ký dù biết thừa thuật toán?
 3. `HS256`, `RS256`, `ES256` khác nhau ở đâu trong ruột — và vì sao chọn sai cái lại mở toang cửa hậu?
 
 > [!IMPORTANT]
-> Chữ ký JWT **không** mã hóa dữ liệu — payload vẫn đọc được bằng mắt thường. Nó chỉ làm **một việc duy nhất**: chứng minh "token này do người giữ khóa tạo ra và chưa bị sửa". Hiểu sai điều này dẫn tới hai lỗi chết người: (1) nhét secret vào payload tưởng được giấu, (2) tin vào payload mà chưa verify chữ ký.
+> Chữ ký JWT bảo vệ **tính toàn vẹn & nguồn gốc**, KHÔNG bảo vệ **bí mật**. Hiểu sai điều này dẫn tới hai lỗi chết người: (1) nhét secret/PII vào payload tưởng được giấu, (2) tin vào payload mà chưa verify chữ ký.
 
 Trong doc này, ta mổ xẻ từng lớp: từ chuỗi byte đầu vào, qua HMAC/RSA/ECDSA, tới phép so sánh cuối cùng.
 

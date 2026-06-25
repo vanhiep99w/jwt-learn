@@ -7,7 +7,7 @@ description: "Mổ xẻ chi tiết các đòn tấn công lợi dụng header al
 
 ## Mục lục
 
-- [Bối cảnh: Một token admin tự chế, server gật đầu](#1-bối-cảnh-một-token-admin-tự-chế-server-gật-đầu)
+- [Góc nhìn kẻ tấn công: được tự chọn luật chơi](#1-góc-nhìn-kẻ-tấn-công-được-tự-chọn-luật-chơi)
 - [Gốc rễ: alg nằm trong token do kẻ tấn công kiểm soát](#2-gốc-rễ-alg-nằm-trong-token-do-kẻ-tấn-công-kiểm-soát)
 - [Đòn 1: alg:none — bỏ luôn chữ ký](#3-đòn-1-algnone--bỏ-luôn-chữ-ký)
 - [Đòn 2: RS256 → HS256 confusion](#4-đòn-2-rs256--hs256-confusion)
@@ -22,9 +22,11 @@ description: "Mổ xẻ chi tiết các đòn tấn công lợi dụng header al
 
 ---
 
-## 1. Bối cảnh: Một token admin tự chế, server gật đầu
+## 1. Góc nhìn kẻ tấn công: được tự chọn luật chơi
 
-Bạn pentest một API. Đăng nhập tài khoản thường, nhận token:
+Mọi đòn trong doc này bắt đầu từ cùng một góc nhìn: kẻ tấn công **không** cần bẻ khóa mật mã. Họ chỉ cần để ý một sự thật: header của JWT — `alg`, `kid`, `jku`, `jwk` — đều do **bên gửi** điền, tức chính họ. Nếu server tin vào header để quyết định *cách verify*, thì kẻ tấn công đang được **tự chọn luật chơi** mà chính mình sẽ bị kiểm tra.
+
+Để thấy hậu quả cụ thể, đặt mình vào vai pentester. Bạn đăng nhập tài khoản thường, nhận token:
 
 ```text
 header  = {"alg":"RS256","kid":"prod-2024"}
