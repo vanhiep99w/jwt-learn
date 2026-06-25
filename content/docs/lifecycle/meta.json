@@ -1,0 +1,10 @@
+{
+  "title": "Token Lifecycle",
+  "pages": [
+    "issuing-token",
+    "access-token-vs-refresh-token",
+    "expiration-and-renewal",
+    "revocation-and-logout",
+    "blacklist-whitelist"
+  ]
+}

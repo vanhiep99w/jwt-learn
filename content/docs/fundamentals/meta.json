@@ -1,0 +1,11 @@
+{
+  "title": "Fundamentals",
+  "pages": [
+    "jwt-overview",
+    "authentication-vs-authorization",
+    "session-vs-token",
+    "jwt-structure",
+    "claims",
+    "encoding-vs-encryption"
+  ]
+}

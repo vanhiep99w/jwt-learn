@@ -1,0 +1,11 @@
+{
+  "title": "Security",
+  "pages": [
+    "jwt-threat-model",
+    "common-vulnerabilities",
+    "algorithm-confusion",
+    "xss-csrf-token-theft",
+    "secure-storage",
+    "security-best-practices"
+  ]
+}

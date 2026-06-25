@@ -1,0 +1,14 @@
+{
+  "title": "JWT Learn",
+  "pages": [
+    "index",
+    "fundamentals",
+    "internals",
+    "cryptography",
+    "lifecycle",
+    "implementation",
+    "security",
+    "operations",
+    "case-studies"
+  ]
+}

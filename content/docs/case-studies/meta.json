@@ -1,0 +1,10 @@
+{
+  "title": "Case Studies",
+  "pages": [
+    "web-app-login",
+    "multi-tenant-saas",
+    "service-to-service",
+    "zero-trust-api",
+    "incident-response-leaked-token"
+  ]
+}

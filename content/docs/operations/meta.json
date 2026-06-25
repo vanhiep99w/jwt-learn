@@ -1,0 +1,10 @@
+{
+  "title": "Operations",
+  "pages": [
+    "debugging-jwt",
+    "testing-auth-flow",
+    "observability-and-audit",
+    "production-checklist",
+    "migration-strategy"
+  ]
+}
