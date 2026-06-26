@@ -26,10 +26,10 @@ description: "So sánh xác thực stateful (session-cookie) và stateless (JWT)
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│  STATEFUL (session):  SERVER NHỚ ai đang đăng nhập.                        │
-│     client chỉ cầm một CON TRỎ (session_id) — bản thân nó vô nghĩa.        │
-│     "ai là user 7f3a?" → server phải TRA store mới biết.                   │
-│                                                                            │
+│  STATEFUL (session):  SERVER NHỚ ai đang đăng nhập.                       │
+│     client chỉ cầm một CON TRỎ (session_id) — bản thân nó vô nghĩa.       │
+│     "ai là user 7f3a?" → server phải TRA store mới biết.                  │
+│                                                                           │
 │  STATELESS (JWT):     TOKEN TỰ KHAI nó là ai.                             │
 │     client cầm cả DỮ LIỆU (claims đã ký) — đọc thẳng ra là biết.          │
 │     "ai là token này?" → verify chữ ký rồi đọc claim, KHÔNG tra store.    │
@@ -58,9 +58,9 @@ MỖI REQUEST:
 
 ```
    ┌────────┐  sid=7f3a (cookie)  ┌────────┐  GET 7f3a  ┌──────────────┐
-   │ browser│ ──────────────────▶ │ server │ ─────────▶ │ session store │
+   │ browser│ ──────────────────▶ │ server │ ─────────▶ │ session store│
    └────────┘                     └────────┘            │ 7f3a→{u:42}  │
-                                       ▲                 └──────────────┘
+                                       ▲                └──────────────┘
                                        └── biết user 42, role admin
 ```
 
@@ -115,7 +115,7 @@ MỖI REQUEST:
 ```
                  SERVER GIỮ TRẠNG THÁI          TOKEN GIỮ TRẠNG THÁI
                  (session, stateful)            (JWT, stateless)
-   ┌──────────────────────────────────┬──────────────────────────────────┐
+   ┌───────────────────────────────────┬───────────────────────────────────┐
    │ thu hồi tức thì    ✓ xoá 1 dòng   │ ✗ token sống tới exp              │
    │ chi phí mỗi request ✗ tra store   │ ✓ verify cục bộ                   │
    │ scale ngang        ✗ cần store    │ ✓ chỉ cần chia sẻ khoá            │
@@ -123,7 +123,7 @@ MỖI REQUEST:
    │ bộ nhớ             ✗ tỉ lệ #user  │ ✓ ~0 (không lưu)                  │
    │ kích thước/request ✓ id nhỏ (~40B)│ ✗ token to (200B–1.5KB)           │
    │ federation/SSO     ✗ khó          │ ✓ token tự verify ở mọi bên       │
-   └──────────────────────────────────┴──────────────────────────────────┘
+   └───────────────────────────────────┴───────────────────────────────────┘
    → KHÔNG có bên thắng tuyệt đối: mỗi ✓ của bên này là ✗ của bên kia.
 ```
 
@@ -145,12 +145,12 @@ JWT: mỗi request = 1 lần VERIFY CHỮ KÝ cục bộ
 ```
 
 ```
-┌───────────────────────────────────────────────────────────────────────────┐
-│  KHÁC BIỆT BẢN CHẤT:                                                       │
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  KHÁC BIỆT BẢN CHẤT:                                                        │
 │     session → chi phí mỗi request là I/O MẠNG tới store (chậm, có thể nghẽn)│
 │     JWT      → chi phí mỗi request là PHÉP TOÁN CPU cục bộ (rất nhanh)      │
 │  → ở tải cao, session store dễ thành điểm nghẽn; JWT phân tán tải ra node.  │
-└───────────────────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ```
@@ -215,11 +215,11 @@ JWT — thu hồi = khó:
 ```
 
 ```
-┌───────────────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────────────────┐
 │  NGHỊCH LÝ: muốn JWT "thu hồi được" → thêm denylist tra store mỗi request  │
 │  → khi đó bạn lại trả cái giá I/O của session, MẤT ưu thế stateless.       │
 │  → nếu thu-hồi-tức-thì là yêu cầu CỨNG cho hệ đơn giản: dùng session.      │
-└───────────────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 > [!WARNING]
@@ -287,11 +287,11 @@ REFRESH TOKEN = opaque, CÓ trạng thái (stateful)
 ```
 
 ```
-┌───────────────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────────────────┐
 │  Ý TƯỞNG: đặt phần TẦN SUẤT CAO (mỗi request) lên JWT stateless (nhanh),   │
 │  đặt phần CẦN THU HỒI (refresh) lên token có trạng thái (revoke được).     │
 │  → verify cục bộ cho 99% lưu lượng, vẫn giữ được khả năng đăng xuất thật.  │
-└───────────────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 > [!IMPORTANT]
@@ -319,10 +319,10 @@ REFRESH TOKEN = opaque, CÓ trạng thái (stateful)
 ┌─────────────────────────── SESSION vs TOKEN ─────────────────────────────┐
 │                                                                          │
 │  CÂU HỎI GỐC: trạng thái phiên nằm Ở ĐÂU?                                │
-│     SESSION → ở SERVER (store)   · JWT → trong TOKEN                      │
+│     SESSION → ở SERVER (store)   · JWT → trong TOKEN                     │
 │                                                                          │
 │  SESSION (stateful):                                                     │
-│     ✓ thu hồi tức thì (xoá 1 dòng) · ✗ tra store mỗi request · cần store  │
+│     ✓ thu hồi tức thì (xoá 1 dòng) · ✗ tra store mỗi request · cần store │
 │  JWT (stateless):                                                        │
 │     ✓ verify cục bộ, scale, federation · ✗ khó thu hồi · token to        │
 │                                                                          │
@@ -331,7 +331,7 @@ REFRESH TOKEN = opaque, CÓ trạng thái (stateful)
 │  CHỌN: cần revoke tức thì + hệ đơn giản → SESSION                        │
 │        đa instance / microservices / SSO  → JWT                          │
 │        cả hai → LAI: access=JWT (ngắn) + refresh=opaque (revoke được)    │
-└────────────────────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
 ```

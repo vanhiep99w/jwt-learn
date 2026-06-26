@@ -34,10 +34,10 @@ Vì sao tên claim chuẩn lại cụt lủn (`sub`, `aud`, `exp`) chứ không 
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│  LÝ DO: JWT đi kèm MỌI request → mỗi byte payload nhân lên hàng triệu lần.  │
-│     "exp" (3 ký tự) vs "expiration" (10) → tiết kiệm 7 byte MỖI token.      │
-│     RFC 7519 cố tình chọn tên 3 ký tự để token gọn nhất có thể.            │
-│  → đây cũng là triết lý chung: payload càng nhỏ càng tốt (xem §8).         │
+│  LÝ DO: JWT đi kèm MỌI request → mỗi byte payload nhân lên hàng triệu lần.│
+│     "exp" (3 ký tự) vs "expiration" (10) → tiết kiệm 7 byte MỖI token.    │
+│     RFC 7519 cố tình chọn tên 3 ký tự để token gọn nhất có thể.           │
+│  → đây cũng là triết lý chung: payload càng nhỏ càng tốt (xem §8).        │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -52,17 +52,17 @@ RFC 7519 chia claim làm ba nhóm theo mức độ "ai định nghĩa tên":
 
 ```
 ┌─────────────────┬──────────────────────────────────────────────────────────┐
-│ REGISTERED      │ tên ĐÃ ĐĂNG KÝ trong IANA, có ngữ nghĩa chuẩn.            │
-│ (chuẩn)         │ iss, sub, aud, exp, nbf, iat, jti — 7 cái phổ biến.       │
-│                 │ → thư viện JWT hiểu & verify tự động (exp, nbf, aud...).   │
+│ REGISTERED      │ tên ĐÃ ĐĂNG KÝ trong IANA, có ngữ nghĩa chuẩn.           │
+│ (chuẩn)         │ iss, sub, aud, exp, nbf, iat, jti — 7 cái phổ biến.      │
+│                 │ → thư viện JWT hiểu & verify tự động (exp, nbf, aud...). │
 ├─────────────────┼──────────────────────────────────────────────────────────┤
-│ PUBLIC          │ tên do bạn đặt nhưng ĐĂNG KÝ/đặt theo namespace chống đụng│
-│ (công khai)     │ vd "https://myapp.com/role" hoặc tên trong IANA registry. │
-│                 │ → dùng khi token được CHIA SẺ giữa nhiều bên.             │
+│ PUBLIC          │tên do bạn đặt nhưng ĐĂNG KÝ/đặt theo namespace chống đụng│
+│ (công khai)     │ vd "https://myapp.com/role" hoặc tên trong IANA registry.│
+│                 │ → dùng khi token được CHIA SẺ giữa nhiều bên.            │
 ├─────────────────┼──────────────────────────────────────────────────────────┤
-│ PRIVATE         │ tên TỰ ĐẶT, chỉ có ý nghĩa giữa các bên đã thống nhất.    │
-│ (riêng tư)      │ vd "role", "tenant_id", "plan" — nội bộ hệ của bạn.       │
-│                 │ → rủi ro: trùng tên với bên khác nếu token đi ra ngoài.   │
+│ PRIVATE         │ tên TỰ ĐẶT, chỉ có ý nghĩa giữa các bên đã thống nhất.   │
+│ (riêng tư)      │ vd "role", "tenant_id", "plan" — nội bộ hệ của bạn.      │
+│                 │ → rủi ro: trùng tên với bên khác nếu token đi ra ngoài.  │
 └─────────────────┴──────────────────────────────────────────────────────────┘
 ```
 
@@ -97,10 +97,10 @@ VÍ DỤ MỘT PAYLOAD CÓ CẢ BA LOẠI:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│  3 CLAIM ĐỊNH DANH NGỮ CẢNH (WHO/WHERE):  iss · sub · aud                  │
-│  3 CLAIM THỜI GIAN (WHEN):                exp · nbf · iat                  │
+│  3 CLAIM ĐỊNH DANH NGỮ CẢNH (WHO/WHERE):  iss · sub · aud                 │
+│  3 CLAIM THỜI GIAN (WHEN):                exp · nbf · iat                 │
 │  1 CLAIM ĐỊNH DANH TOKEN (WHICH):         jti                             │
-│  → nhớ theo nhóm dễ hơn nhớ rời 7 cái.                                     │
+│  → nhớ theo nhóm dễ hơn nhớ rời 7 cái.                                    │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -156,7 +156,7 @@ exp - iat = 3600 giây = 60 phút  → TTL của token này là 1 giờ
 │  LỖI KINH ĐIỂN: exp = Date.now()  (JavaScript trả MILI-giây!)             │
 │     Date.now()           = 1700000000000  (mili-giây)                     │
 │     epoch giây đúng       = 1700000000     (chia 1000)                    │
-│  → đặt exp = Date.now() → token "hết hạn" vào năm ~55000 → sống ~1700 năm! │
+│  → đặt exp = Date.now() → token "hết hạn" vào năm ~55000 → sống ~1700 năm!│
 │  ĐÚNG: exp = Math.floor(Date.now()/1000) + ttlGiây                        │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
@@ -240,17 +240,17 @@ Câu hỏi thực dụng nhất: nhét gì vào claims? Nguyên tắc: **tối t
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│  NÊN ĐẶT:                                                                  │
+│  NÊN ĐẶT:                                                                 │
 │     • định danh: sub (+ iss)                                              │
-│     • ngữ cảnh:  aud                                                       │
-│     • thời gian: exp, iat (nbf nếu cần)                                    │
-│     • quyền Ở MỨC THÔ đủ để phân quyền nhanh: role / scope (vài giá trị)   │
-│                                                                            │
-│  KHÔNG NÊN ĐẶT:                                                            │
-│     • mật khẩu, secret, khoá  → lộ (payload đọc được)                      │
-│     • PII nhạy cảm: số CMND, thẻ, địa chỉ, sức khoẻ → lộ + ràng buộc luật  │
-│     • dữ liệu hay đổi: số dư, giỏ hàng → claim là ảnh chụp đông cứng (§9)  │
-│     • danh sách quyền CHI TIẾT dài dằng dặc → token phình, khó cập nhật    │
+│     • ngữ cảnh:  aud                                                      │
+│     • thời gian: exp, iat (nbf nếu cần)                                   │
+│     • quyền Ở MỨC THÔ đủ để phân quyền nhanh: role / scope (vài giá trị)  │
+│                                                                           │
+│  KHÔNG NÊN ĐẶT:                                                           │
+│     • mật khẩu, secret, khoá  → lộ (payload đọc được)                     │
+│     • PII nhạy cảm: số CMND, thẻ, địa chỉ, sức khoẻ → lộ + ràng buộc luật │
+│     • dữ liệu hay đổi: số dư, giỏ hàng → claim là ảnh chụp đông cứng (§9) │
+│     • danh sách quyền CHI TIẾT dài dằng dặc → token phình, khó cập nhật   │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -279,7 +279,7 @@ t1..exp  user VẪN gửi JWT cũ ghi "role":"editor"
 ```
 
 ```
-┌───────────────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────────────────┐
 │  CLAIM = ẢNH CHỤP TẠI LÚC PHÁT, không phải "trạng thái hiện tại".          │
 │  Hệ quả: mọi thay đổi quyền/trạng thái chỉ có hiệu lực ở token PHÁT SAU đó.│
 │                                                                            │
@@ -287,7 +287,7 @@ t1..exp  user VẪN gửi JWT cũ ghi "role":"editor"
 │     • TTL access NGẮN → ảnh chụp cũ hết hạn nhanh (5–15')                  │
 │     • quyền nhạy cảm → kiểm TƯƠI ở resource server, đừng tin claim         │
 │     • cần thu hồi tức thì → denylist theo jti / tokensValidAfter           │
-└───────────────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 > [!IMPORTANT]
@@ -314,17 +314,17 @@ t1..exp  user VẪN gửi JWT cũ ghi "role":"editor"
 ## 11. Tóm tắt — Cheat sheet
 
 ```
-┌─────────────────────────────── CLAIMS ───────────────────────────────────┐
+┌─────────────────────────────── CLAIMS ────────────────────────────────────┐
 │                                                                           │
 │  BA LOẠI:  registered (iss,sub,aud,exp,nbf,iat,jti) · public (namespace)  │
-│            · private (tên tự đặt, nội bộ)                                  │
+│            · private (tên tự đặt, nội bộ)                                 │
 │                                                                           │
 │  NHÓM REGISTERED:                                                         │
 │     WHO/WHERE  iss (ai phát) · sub (về ai) · aud (cho dịch vụ nào)        │
 │     WHEN       exp (hết hạn) · nbf (chưa hiệu lực) · iat (phát lúc nào)   │
-│     WHICH      jti (định danh token, chống replay/denylist)              │
+│     WHICH      jti (định danh token, chống replay/denylist)               │
 │                                                                           │
-│  ĐẶT:      định danh + ngữ cảnh + thời gian + quyền THÔ (role/scope)       │
+│  ĐẶT:      định danh + ngữ cảnh + thời gian + quyền THÔ (role/scope)      │
 │  ĐỪNG ĐẶT: PII/secret · dữ liệu hay đổi · quyền chi tiết dài              │
 │                                                                           │
 │  NHỚ:  epoch GIÂY (không phải mili-giây) · claim = ẢNH CHỤP đông cứng     │

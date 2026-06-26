@@ -34,13 +34,13 @@ Hai từ khoá định nghĩa nên bản chất JWT:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│  TỰ CHỨA (self-contained):                                                 │
-│     mọi thông tin cần để dùng token nằm NGAY TRONG token (sub, role, exp). │
-│     → verifier không cần tra database/phiên để biết "đây là ai, quyền gì". │
-│                                                                             │
-│  CÓ CHỮ KÝ (signed):                                                       │
-│     phần chữ ký chứng minh token do bên có khoá ký phát ra & chưa bị sửa.  │
-│     → KHÔNG phải mã hoá: nội dung vẫn đọc được, chỉ là không sửa được lén. │
+│  TỰ CHỨA (self-contained):                                                │
+│     mọi thông tin cần để dùng token nằm NGAY TRONG token (sub, role, exp).│
+│     → verifier không cần tra database/phiên để biết "đây là ai, quyền gì".│
+│                                                                           │
+│  CÓ CHỮ KÝ (signed):                                                      │
+│     phần chữ ký chứng minh token do bên có khoá ký phát ra & chưa bị sửa. │
+│     → KHÔNG phải mã hoá: nội dung vẫn đọc được, chỉ là không sửa được lén.│
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -58,7 +58,7 @@ KIẾN TRÚC SESSION TRUYỀN THỐNG (stateful):
    login → server tạo session, lưu vào RAM/Redis/DB → trả về session_id (cookie)
    mỗi request → server TRA session_id trong store → biết user
    ┌────────┐  sid   ┌────────┐  tra store  ┌─────────────┐
-   │ client │ ─────▶ │ server │ ──────────▶ │ session store│
+   │ client │ ─────▶ │ server │ ──────────▶ │session store│
    └────────┘        └────────┘             └─────────────┘
    VẤN ĐỀ khi scale ngang:
       • có 5 server → session ở server A, request rơi vào server B → "chưa đăng nhập"
@@ -104,10 +104,10 @@ SIGNATURE HMAC-SHA256(base64url(header)+"."+base64url(payload), secret)
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│  Điều dễ gây sốc với người mới: header và payload chỉ là JSON được          │
-│  base64url — AI CŨNG GIẢI RA ĐỌC ĐƯỢC (dán lên jwt.io là thấy).            │
-│  base64url KHÔNG phải mã hoá. JWT (dạng JWS) bảo vệ TOÀN VẸN, không bí mật.  │
-│  → không bao giờ để mật khẩu/PII/secret trong payload. (xem §10, §4)        │
+│  Điều dễ gây sốc với người mới: header và payload chỉ là JSON được        │
+│  base64url — AI CŨNG GIẢI RA ĐỌC ĐƯỢC (dán lên jwt.io là thấy).           │
+│ base64url KHÔNG phải mã hoá. JWT (dạng JWS) bảo vệ TOÀN VẸN, không bí mật.│
+│  → không bao giờ để mật khẩu/PII/secret trong payload. (xem §10, §4)      │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -136,10 +136,10 @@ QUAN HỆ:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│  KHI NÀO CẦN JWE (mã hoá) THAY VÌ JWS (ký):                                │
-│     JWS đủ cho 99% auth: ta chỉ cần "không bị giả", không cần giấu claims. │
-│     JWE khi token BẮT BUỘC chứa dữ liệu nhạy cảm mà bên trung gian không    │
-│     được đọc (hiếm — tốt hơn là ĐỪNG nhét dữ liệu nhạy cảm vào token).      │
+│  KHI NÀO CẦN JWE (mã hoá) THAY VÌ JWS (ký):                               │
+│     JWS đủ cho 99% auth: ta chỉ cần "không bị giả", không cần giấu claims.│
+│     JWE khi token BẮT BUỘC chứa dữ liệu nhạy cảm mà bên trung gian không  │
+│     được đọc (hiếm — tốt hơn là ĐỪNG nhét dữ liệu nhạy cảm vào token).    │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -259,12 +259,12 @@ JWT bị lạm dụng nhiều. Có những chỗ session cookie truyền thống
 ```
 
 ```
-┌───────────────────────────────────────────────────────────────────────────┐
-│  PHÉP THỬ NHANH: "Tôi có CẦN verify cục bộ ở nhiều nơi không?"             │
-│     CÓ  → JWT hợp lý (scale, phân tán, federation).                        │
-│     KHÔNG (một backend, cần revoke tức thì) → session cookie thường tốt hơn.│
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  PHÉP THỬ NHANH: "Tôi có CẦN verify cục bộ ở nhiều nơi không?"               │
+│     CÓ  → JWT hợp lý (scale, phân tán, federation).                          │
+│     KHÔNG (một backend, cần revoke tức thì) → session cookie thường tốt hơn. │
 │  Đừng chọn JWT chỉ vì "nghe hiện đại" — chọn vì đánh đổi của nó hợp bài toán.│
-└───────────────────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 > [!IMPORTANT]
@@ -275,17 +275,17 @@ JWT bị lạm dụng nhiều. Có những chỗ session cookie truyền thống
 ## 9. JWT so với các loại token khác
 
 ```
-┌──────────────────┬─────────────────────────┬──────────────────────────────┐
-│ Loại token       │ Verify thế nào          │ Đặc tính                     │
-├──────────────────┼─────────────────────────┼──────────────────────────────┤
-│ JWT (JWS)        │ verify chữ ký CỤC BỘ    │ tự chứa, stateless, khó revoke│
-│ Opaque token     │ TRA store/introspect    │ revoke tức thì, cần round-trip│
-│  (session id)    │                         │ store; không tự đọc được      │
-│ JWE              │ giải mã + verify        │ như JWT nhưng nội dung bí mật │
+┌──────────────────┬─────────────────────────┬─────────────────────────────────┐
+│ Loại token       │ Verify thế nào          │ Đặc tính                        │
+├──────────────────┼─────────────────────────┼─────────────────────────────────┤
+│ JWT (JWS)        │ verify chữ ký CỤC BỘ    │ tự chứa, stateless, khó revoke  │
+│ Opaque token     │ TRA store/introspect    │ revoke tức thì, cần round-trip  │
+│  (session id)    │                         │ store; không tự đọc được        │
+│ JWE              │ giải mã + verify        │ như JWT nhưng nội dung bí mật   │
 │ SAML assertion   │ verify chữ ký XML       │ XML, nặng, dùng SSO doanh nghiệp│
-│ PASETO           │ verify (versioned)      │ "JWT an toàn hơn", ít cấu hình│
-│                  │                         │ nguy hiểm (không có alg:none) │
-└──────────────────┴─────────────────────────┴──────────────────────────────┘
+│ PASETO           │ verify (versioned)      │ "JWT an toàn hơn", ít cấu hình  │
+│                  │                         │ nguy hiểm (không có alg:none)   │
+└──────────────────┴─────────────────────────┴─────────────────────────────────┘
 ```
 
 ```
@@ -342,18 +342,18 @@ HIỂU LẦM 3: "JWT luôn tốt hơn session vì nó hiện đại/stateless"
 ## 12. Tóm tắt — Cheat sheet
 
 ```
-┌─────────────────────────── JWT TRONG MỘT KHUNG ───────────────────────────┐
+┌─────────────────────────── JWT TRONG MỘT KHUNG ────────────────────────────┐
 │                                                                            │
 │  JWT = JSON claims + đóng gói gọn + KÝ (không mã hoá)                      │
 │        → TỰ CHỨA (đọc thẳng ra) + CHỐNG SỬA (verify chữ ký cục bộ)         │
 │                                                                            │
-│  HỌ JOSE:  JWT≈JWS (ký, đọc được) · JWE (mã hoá) · JWK (khoá)             │
+│  HỌ JOSE:  JWT≈JWS (ký, đọc được) · JWE (mã hoá) · JWK (khoá)              │
 │                                                                            │
-│  ĐÁNH ĐỔI CỐT LÕI:                                                        │
-│     ĐƯỢC : verify cục bộ, không tra store → scale/phân tán/federation     │
-│     MẤT  : thu hồi tức thì khó (token sống tới exp) + token to hơn        │
+│  ĐÁNH ĐỔI CỐT LÕI:                                                         │
+│     ĐƯỢC : verify cục bộ, không tra store → scale/phân tán/federation      │
+│     MẤT  : thu hồi tức thì khó (token sống tới exp) + token to hơn         │
 │                                                                            │
-│  DÙNG khi : API stateless, microservices, SSO/OIDC, M2M                   │
+│  DÙNG khi : API stateless, microservices, SSO/OIDC, M2M                    │
 │  TRÁNH khi: web một-server cần revoke tức thì, chứa dữ liệu nhạy cảm       │
 │                                                                            │
 │  MẪU CHUẨN: access JWT (ngắn, stateless) + refresh token (dài, revoke được)│

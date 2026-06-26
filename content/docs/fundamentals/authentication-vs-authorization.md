@@ -80,15 +80,15 @@ JWT không phải "cơ chế đăng nhập" — nó là **vật mang kết quả
 ```
 
 ```
-┌───────────────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────────────────┐
 │  VAI TRÒ CỦA JWT:                                                          │
-│     • KẾT QUẢ AuthN: claim "sub" = danh tính đã được xác thực (anh là ai).│
+│     • KẾT QUẢ AuthN: claim "sub" = danh tính đã được xác thực (anh là ai). │
 │     • DỮ LIỆU cho AuthZ: claim "role"/"scope" = nguyên liệu để quyết quyền.│
 │  JWT KHÔNG tự xác thực user (đó là việc của login: mật khẩu/OTP/khoá),     │
 │  cũng KHÔNG tự phân quyền (đó là logic ở resource server đọc claim).       │
 │  JWT chỉ CHUYÊN CHỞ kết quả & dữ liệu giữa hai bước — một cách đáng tin    │
-│  (vì có chữ ký, xem Chữ ký số).                                           │
-└───────────────────────────────────────────────────────────────────────────┘
+│  (vì có chữ ký, xem Chữ ký số).                                            │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 > [!IMPORTANT]
@@ -140,7 +140,7 @@ BA TẦNG KIỂM TÁCH BẠCH Ở RESOURCE SERVER:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│  PHÉP THỬ: "Đăng nhập lại có giải quyết được không?"                       │
+│  PHÉP THỬ: "Đăng nhập lại có giải quyết được không?"                      │
 │     CÓ   → đó là 401 (vấn đề danh tính/token).                            │
 │     KHÔNG (đúng người nhưng thiếu quyền) → đó là 403.                     │
 └───────────────────────────────────────────────────────────────────────────┘
@@ -185,16 +185,16 @@ NÊN DÙNG GÌ:
 ## 7. Mô hình phân quyền: RBAC, ABAC, ReBAC
 
 ```
-┌──────────┬────────────────────────────────────┬─────────────────────────────┐
-│ Mô hình  │ Quyết định dựa trên                │ JWT mang gì                 │
-├──────────┼────────────────────────────────────┼─────────────────────────────┤
+┌──────────┬─────────────────────────────────────┬─────────────────────────────┐
+│ Mô hình  │ Quyết định dựa trên                 │ JWT mang gì                 │
+├──────────┼─────────────────────────────────────┼─────────────────────────────┤
 │ RBAC     │ VAI TRÒ (role) → tập quyền          │ role/roles                  │
-│ (role)   │ "admin được mọi thứ"               │                             │
+│ (role)   │ "admin được mọi thứ"                │                             │
 │ ABAC     │ THUỘC TÍNH (attribute) + ngữ cảnh   │ vài attribute (dept, tier)  │
-│ (attr)   │ "dept=finance & giờ hành chính"    │ + server đánh giá policy    │
-│ ReBAC    │ QUAN HỆ (relationship) giữa đối tượng│ sub; quan hệ tra ở store    │
-│ (relation)│ "user là owner của doc X"          │ riêng (vd Zanzibar)         │
-└──────────┴────────────────────────────────────┴─────────────────────────────┘
+│ (attr)   │ "dept=finance & giờ hành chính"     │ + server đánh giá policy    │
+│ ReBAC    │QUAN HỆ (relationship) giữa đối tượng│ sub; quan hệ tra ở store    │
+│(relation)│ "user là owner của doc X"           │ riêng (vd Zanzibar)         │
+└──────────┴─────────────────────────────────────┴─────────────────────────────┘
 ```
 
 ```
@@ -226,9 +226,9 @@ OIDC (OpenID Connect) = lớp XÁC THỰC (AUTHENTICATION) ĐẶT TRÊN OAuth2.
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│  PHÂN BIỆT 2 TOKEN CỦA OIDC/OAuth2:                                        │
-│     ID TOKEN     → cho CLIENT biết "user là ai" (AuthN). Đừng gửi tới API. │
-│     ACCESS TOKEN → cho API biết "được phép làm gì" (AuthZ). Gửi tới API.   │
+│  PHÂN BIỆT 2 TOKEN CỦA OIDC/OAuth2:                                       │
+│     ID TOKEN     → cho CLIENT biết "user là ai" (AuthN). Đừng gửi tới API.│
+│     ACCESS TOKEN → cho API biết "được phép làm gì" (AuthZ). Gửi tới API.  │
 │  Lỗi phổ biến: dùng id_token để gọi API, hoặc dùng access_token để lấy    │
 │  thông tin danh tính → sai vai trò token.                                 │
 └───────────────────────────────────────────────────────────────────────────┘
@@ -300,7 +300,7 @@ LỖ HỔNG 4 — phân quyền Ở CLIENT (ẩn nút ≠ chặn):
 │                                                                           │
 │  OAuth2 = uỷ quyền (access_token, scope) · OIDC = xác thực (id_token)     │
 │  QUYỀN:  role (RBAC) · scope (OAuth2) · permission (mịn, dễ phình)        │
-└────────────────────────────────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────────────────────────────┘
 ```
 
 ```
