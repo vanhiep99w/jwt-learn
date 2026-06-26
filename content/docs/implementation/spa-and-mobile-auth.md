@@ -111,7 +111,7 @@ sequenceDiagram
     U->>S: nhập credentials
     S->>A: POST /login
     A-->>S: { access } (body) + Set-Cookie refresh (HttpOnly)
-    Note over S: access lưu BIẾN JS; refresh nằm cookie JS không đọc
+    Note over S: access lưu BIẾN JS, refresh nằm cookie JS không đọc
     S->>A: GET /api/... (Authorization: Bearer access)
     A-->>S: 200 data
     Note over S: user F5 → access trong memory MẤT

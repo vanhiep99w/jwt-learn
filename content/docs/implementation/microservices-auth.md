@@ -247,7 +247,7 @@ sequenceDiagram
     Z->>Z: verify user-jwt, thu hẹp scope, đặt aud=payment-svc
     Z-->>A: access token mới (sub=user, aud=payment-svc, act=order-svc)
     A->>B: gọi với token mới
-    B->>B: verify aud=payment-svc; thấy act=order-svc (chuỗi ủy quyền)
+    B->>B: verify aud=payment-svc, thấy act=order-svc (chuỗi ủy quyền)
 ```
 
 ```javascript
@@ -357,10 +357,10 @@ sequenceDiagram
     U->>G: POST /orders (Bearer user-jwt)
     G->>G: verify user-jwt
     G->>O: forward (aud chứa order-svc)
-    O->>O: verify (aud=order-svc); userId=sub
+    O->>O: verify aud=order-svc, userId=sub
     O->>Z: token-exchange → token aud=payment-svc, act=order-svc
     O->>P: POST /charge (token mới)
-    P->>P: verify (aud=payment-svc); thấy act=order-svc, sub=user
+    P->>P: verify aud=payment-svc, thấy act=order-svc, sub=user
     P->>L: ghi sổ (service-token client_credentials, scope=ledger:write)
     L->>L: verify (aud=ledger-svc, scope=ledger:write)
     L-->>P: ok
