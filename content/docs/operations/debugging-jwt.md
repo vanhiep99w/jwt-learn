@@ -518,7 +518,7 @@ KHI MỘT TOKEN BỊ TỪ CHỐI, SOÁT THEO THỨ TỰ (dừng ở dòng đầu
 ## Tài liệu tham khảo
 
 - [Luồng xác thực JWT — Deep Dive](/internals/token-validation-flow/) — 7 cổng verify chi tiết
-- [Token Validation — Deep Dive](/internals/token-validation-deep-dive/)
+- [Token Validation — Deep Dive](/internals/token-validation-flow/)
 - [Common Vulnerabilities](/security/common-vulnerabilities/) — vì sao decode≠verify nguy hiểm
 - [Algorithm Confusion](/security/algorithm-confusion/) — lỗi tầng thuật toán
 - [Cấu trúc JWT](/fundamentals/jwt-structure/) — header/payload/signature

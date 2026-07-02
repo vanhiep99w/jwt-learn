@@ -225,7 +225,7 @@ RFC 7519 yêu cầu JWT serialize JSON theo quy tắc:
                     └ có dấu cách → chuỗi khác → chữ ký khác
 ```
 
-<Callout type="warn" title="Verilizer không re-serialize JSON">
+<Callout type="warn" title="Verifier không re-serialize JSON">
 Đây là hệ quả quan trọng nhất: khi verify, server **không tự parse rồi serialize lại JSON** rồi tính chữ ký. Nó dùng **chính xác chuỗi byte** nhận được từ token. Vì nếu re-serialize, có thể ra chuỗi khác (thêm dấu cách, khác thứ tự key) → chữ ký lệch dù token gốc hoàn toàn hợp lệ. Nguyên tắc: **ký trên byte gốc, verify trên byte gốc**.
 </Callout>
 
@@ -546,8 +546,10 @@ console.log(token);
 ### 11.2. RS256 thuần — bất đối xứng
 
 ```typescript
-import { sign } from 'crypto';
+import { sign, constants } from 'crypto';
 import { readFileSync } from 'fs';
+
+const { RSA_PKCS1_PADDING } = constants;
 
 function signJWT_RS256(payload: object, privateKeyPem: string, kid?: string): string {
   const header: Record<string, string> = { alg: 'RS256', typ: 'JWT' };
@@ -558,10 +560,12 @@ function signJWT_RS256(payload: object, privateKeyPem: string, kid?: string): st
   const signingInput = `${b64Header}.${b64Payload}`;
 
   // Khác HS256: dùng RSA private key thay vì HMAC
-  const signature = sign(null, Buffer.from(signingInput), {
+  // crypto.sign trả về Buffer raw → tự base64url (dsaEncoding chỉ dành cho DSA/ECDSA)
+  const sigBuffer = sign(null, Buffer.from(signingInput), {
     key: privateKeyPem,
-    dsaEncoding: 'base64url',          // Node hỗ trợ base64url trực tiếp từ v15.7
+    padding: RSA_PKCS1_PADDING,         // RS256 = PKCS#1 v1.5
   });
+  const signature = base64url(sigBuffer);
 
   return `${signingInput}.${signature}`;
 }
@@ -632,9 +636,9 @@ SAI:  parse(token).decode → JSON.stringify lại → tính chữ ký
 
 ```text
 SAI:  access token exp = 30 ngày
-      → token bị lộ nằmief bao lâu thì kẻ tấn công dùng được bấy lâu
+      → token bị lộ nằm ở đâu bao lâu thì kẻ tấn công dùng được bấy lâu
 
-ĐÚNG: access token 5-60 phút, refresh token lâu hơn nhưng có rotation
+ĐÚNG: access token 5-15 phút, refresh token lâu hơn nhưng có rotation
 ```
 
 ---

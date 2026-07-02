@@ -295,10 +295,10 @@ sequenceDiagram
 ```javascript
 import { trace } from '@opentelemetry/api';
 
-function verifyWithSpan(token, opts) {
+async function verifyWithSpan(token, opts) {
   const span = trace.getActiveSpan();
   try {
-    const { payload } = jwtVerifySync(token, key, opts);
+    const { payload } = await jwtVerify(token, key, opts);
     span?.setAttributes({ 'auth.sub': payload.sub, 'auth.jti': payload.jti }); // KHÔNG gắn token
     return payload;
   } catch (e) {

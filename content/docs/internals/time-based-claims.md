@@ -126,7 +126,7 @@ Hiểu bằng đời thường — JWT giống **vé xem phim**:
          → chấp nhận (còn hiệu lực)
 ```
 
-`exp` là **hạn sử dụng** của token. Giống sữa có hạn sử dụng — qua日期, dù sữa trông vẫn tốt, vứt đi.
+`exp` là **hạn sử dụng** của token. Giống sữa có hạn sử dụng — qua hạn, dù sữa trông vẫn tốt, vứt đi.
 
 ### 3.2. Vì sao exp quan trọng nhất — giới hạn thiệt hại
 
@@ -168,7 +168,7 @@ Không có cách nào đảm bảo token không bao giờ bị lộ — XSS, WiF
 ```
 
 > [!IMPORTANT]
-> Phải config verifier **require `exp`** — reject mọi access token không có `exp`. Trong `jsonwebtoken` (Node): `verify(token, key, { requireExpiration: true })`. Trong PyJWT: kiểm tra `payload.get('exp') is not None` sau decode. Mặc định nhiều thư viện **không require** — đây là gap chết người.
+> Phải config verifier **require `exp`** — reject mọi access token không có `exp`. Vì `jsonwebtoken` (Node) và nhiều thư viện **không có option require native**, phải check thủ công sau khi verify: `if (payload.exp === undefined) throw`. Trong PyJWT: kiểm tra `payload.get('exp') is not None` sau decode. Mặc định các thư viện **không require** — đây là gap chết người.
 
 ---
 

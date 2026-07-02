@@ -186,7 +186,7 @@ THỨ TỰ KIỂM (jose tự lo, nhưng nên hiểu):
 ```
 
 <Callout type="error" title="Sai lầm chí mạng: tin alg trong header">
-Tuyệt đối <b>không</b> lấy thuật toán từ <code>header.alg</code> của chính token để rồi verify theo đó. Kẻ tấn công sẽ đặt <code>alg:none</code> hoặc đổi RS256→HS256 (dùng public key làm "secret" HMAC) để bỏ qua/giả chữ ký. Luôn truyền <code>algorithms</code> allowlist cứng từ phía server. Xem <a href="/security/algorithm-confusion-deep-dive/">Algorithm Confusion</a>.
+Tuyệt đối <b>không</b> lấy thuật toán từ <code>header.alg</code> của chính token để rồi verify theo đó. Kẻ tấn công sẽ đặt <code>alg:none</code> hoặc đổi RS256→HS256 (dùng public key làm "secret" HMAC) để bỏ qua/giả chữ ký. Luôn truyền <code>algorithms</code> allowlist cứng từ phía server. Xem <a href="/security/algorithm-confusion/">Algorithm Confusion</a>.
 </Callout>
 
 ---
@@ -230,7 +230,7 @@ Khi IdP xoay khóa (thêm key-2026 cạnh key-2025):
 | JWKS endpoint sập | Verify fail toàn bộ → tưởng "token sai" | Cache còn hạn vẫn dùng; phân biệt lỗi hạ tầng (mục 8) |
 
 > [!TIP]
-> Cache JWKS là bắt buộc cho hiệu năng (mỗi request gọi mạng lấy khóa sẽ giết throughput) nhưng phải cho phép **refetch khi gặp `kid` lạ** — nếu không, ngay khi IdP xoay khóa, mọi token mới sẽ 401 cho đến khi cache hết hạn. `createRemoteJWKSet` xử lý sẵn cả hai. Với HS256 (secret đối xứng) thì nạp secret từ secret manager, không có JWKS — và cân nhắc tránh HS256 cho hệ phân tán (xem [Algorithm Confusion](/security/algorithm-confusion-deep-dive/)).
+> Cache JWKS là bắt buộc cho hiệu năng (mỗi request gọi mạng lấy khóa sẽ giết throughput) nhưng phải cho phép **refetch khi gặp `kid` lạ** — nếu không, ngay khi IdP xoay khóa, mọi token mới sẽ 401 cho đến khi cache hết hạn. `createRemoteJWKSet` xử lý sẵn cả hai. Với HS256 (secret đối xứng) thì nạp secret từ secret manager, không có JWKS — và cân nhắc tránh HS256 cho hệ phân tán (xem [Algorithm Confusion](/security/algorithm-confusion/)).
 
 ---
 
@@ -316,7 +316,7 @@ Quyền hạn phải lấy từ claim đã <b>verify</b> (<code>req.user</code>)
 </Callout>
 
 > [!TIP]
-> Đừng nhồi quá nhiều quyền chi tiết vào token (token phình to, khó thu hồi khi đổi quyền). Mẫu thực dụng: token mang `roles`/`scope` *thô*, còn quyền chi tiết (ABAC) tra ở service tại thời điểm request. Khi quyền đổi, bạn không phải chờ token hết hạn. Xem [Authorization Patterns](/security/authorization-patterns/) nếu có.
+> Đừng nhồi quá nhiều quyền chi tiết vào token (token phình to, khó thu hồi khi đổi quyền). Mẫu thực dụng: token mang `roles`/`scope` *thô*, còn quyền chi tiết (ABAC) tra ở service tại thời điểm request. Khi quyền đổi, bạn không phải chờ token hết hạn. Xem [Security Best Practices](/security/security-best-practices/) để biết mẫu phân quyền nên dùng.
 
 ---
 
@@ -327,7 +327,8 @@ Quyền hạn phải lấy từ claim đã <b>verify</b> (<code>req.user</code>)
 function onAuthError(err, req, res) {
   const code = err?.code || err?.name;       // vd ERR_JWT_EXPIRED, ERR_JWS_SIGNATURE_VERIFICATION_FAILED
   // Phân biệt lỗi client (token sai) vs lỗi hạ tầng (JWKS không nạp được)
-  if (code === 'ERR_JWKS_TIMEOUT' || code === 'ERR_JWKS_NO_MATCHING_KEY' && jwksLikelyDown()) {
+  const INFRA_ERRORS = new Set(['ERR_JWKS_TIMEOUT', 'ERR_JWKS_NO_MATCHING_KEY', 'ERR_JWKS_DOWNLOAD_TIMEOUT']);
+  if (INFRA_ERRORS.has(code)) {
     req.log?.error({ code }, 'jwks infra error');
     return res.status(503).json({ error: 'auth_unavailable' });   // hạ tầng, KHÔNG phải token sai
   }
@@ -619,8 +620,8 @@ NÂNG CAO:
 ## Tài liệu tham khảo
 
 - [HTTP Transport & Storage](/implementation/http-transport-and-storage/) — đọc Bearer, không để token trên URL
-- [Token Validation Deep Dive](/internals/token-validation-deep-dive/) — pipeline verify chi tiết
-- [Algorithm Confusion](/security/algorithm-confusion-deep-dive/) — vì sao allowlist `algorithms`
+- [Token Validation Deep Dive](/internals/token-validation-flow/) — pipeline verify chi tiết
+- [Algorithm Confusion](/security/algorithm-confusion/) — vì sao allowlist `algorithms`
 - [Audience / Issuer / Subject](/internals/audience-issuer-subject/) — ý nghĩa claim aud/iss/sub
 - [API Gateway Auth](/implementation/api-gateway-auth/) — verify tập trung ở gateway
 - [Microservices Auth](/implementation/microservices-auth/) — verify ở mỗi service (zero-trust)

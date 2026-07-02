@@ -111,7 +111,7 @@ RANH GIỚI TIN CẬY (mỗi mũi tên qua biên = điểm cần phòng thủ):
 ```
 
 > [!WARNING]
-> Sai lầm tư duy phổ biến: coi trình duyệt là "phía mình". Trình duyệt là **vùng không tin cậy** — XSS, extension độc, hay chính user đều có thể đọc/sửa mọi thứ ở đó. Đó là lý do payload JWT phải coi như **công khai** (đừng nhét bí mật) và verify phải dựa hoàn toàn vào chữ ký (xem [Token Validation — Deep Dive](/internals/token-validation-deep-dive/)).
+> Sai lầm tư duy phổ biến: coi trình duyệt là "phía mình". Trình duyệt là **vùng không tin cậy** — XSS, extension độc, hay chính user đều có thể đọc/sửa mọi thứ ở đó. Đó là lý do payload JWT phải coi như **công khai** (đừng nhét bí mật) và verify phải dựa hoàn toàn vào chữ ký (xem [Token Validation — Deep Dive](/internals/token-validation-flow/)).
 
 ---
 
@@ -142,7 +142,7 @@ Mỗi giai đoạn vòng đời token mở ra một nhóm tấn công riêng:
 ```
 
 > [!TIP]
-> Cách dùng bảng này: với mỗi giai đoạn, hỏi "ở đây kẻ tấn công làm gì được?". Phần lớn lỗ hổng JWT nổi tiếng rơi vào giai đoạn ④ VERIFY (xem [Common Vulnerabilities](/security/common-vulnerabilities/) và [Algorithm Confusion](/security/algorithm-confusion-deep-dive/)) và ③ LƯU (xem [Secure Storage](/security/secure-storage/)).
+> Cách dùng bảng này: với mỗi giai đoạn, hỏi "ở đây kẻ tấn công làm gì được?". Phần lớn lỗ hổng JWT nổi tiếng rơi vào giai đoạn ④ VERIFY (xem [Common Vulnerabilities](/security/common-vulnerabilities/) và [Algorithm Confusion](/security/algorithm-confusion/)) và ③ LƯU (xem [Secure Storage](/security/secure-storage/)).
 
 ---
 
@@ -507,4 +507,4 @@ HIỂU LẦM 3: "Token nằm ở client nên server không lo"
 2. **Khóa ký là tài sản tối thượng; verify-đúng là phòng tuyến số hai.** Lộ khóa = mọi thứ sụp; verify sai = chữ ký vô dụng. Ưu tiên hai thứ này lên đầu.
 3. **Client không bao giờ tin được.** Payload coi như công khai, mọi dữ liệu client-side coi như bị thao túng được — đây là gốc rễ diệt cả lớp lỗ hổng.
 
-Đọc tiếp các nhánh cụ thể: [Common Vulnerabilities](/security/common-vulnerabilities/) · [Algorithm Confusion](/security/algorithm-confusion-deep-dive/) · [XSS/CSRF & Token Theft](/security/xss-csrf-token-theft/) · [Secure Storage](/security/secure-storage/) · [Security Best Practices](/security/security-best-practices/).
+Đọc tiếp các nhánh cụ thể: [Common Vulnerabilities](/security/common-vulnerabilities/) · [Algorithm Confusion](/security/algorithm-confusion/) · [XSS/CSRF & Token Theft](/security/xss-csrf-token-theft/) · [Secure Storage](/security/secure-storage/) · [Security Best Practices](/security/security-best-practices/).

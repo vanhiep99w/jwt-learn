@@ -43,7 +43,7 @@ Gần như mọi lỗ hổng JWT rơi vào hai nhóm, ánh xạ trực tiếp t�
 ```
 
 > [!IMPORTANT]
-> Quy luật chung: **verify JWT không phải một bước (kiểm chữ ký) mà là nhiều cổng** — chữ ký, thuật toán, thời gian, đối tượng, người cấp. Bỏ bất kỳ cổng nào là một lỗ hổng. Bài này mổ từng lỗ hổng; pipeline verify đầy đủ ở [Token Validation — Deep Dive](/internals/token-validation-deep-dive/), còn họ "confusion" ở [Algorithm Confusion — Deep Dive](/security/algorithm-confusion-deep-dive/).
+> Quy luật chung: **verify JWT không phải một bước (kiểm chữ ký) mà là nhiều cổng** — chữ ký, thuật toán, thời gian, đối tượng, người cấp. Bỏ bất kỳ cổng nào là một lỗ hổng. Bài này mổ từng lỗ hổng; pipeline verify đầy đủ ở [Token Validation — Deep Dive](/internals/token-validation-flow/), còn họ "confusion" ở [Algorithm Confusion — Deep Dive](/security/algorithm-confusion/).
 
 ---
 
@@ -273,7 +273,7 @@ Các header `jku` (JWK Set URL), `x5u` (X.509 URL), `jwk` (khóa nhúng thẳng)
 ```
 
 > [!IMPORTANT]
-> Nguyên tắc chung của cả §7–§8: **token KHÔNG được tự quyết định nó verify bằng khóa nào.** Verifier giữ quyền chọn khóa (từ cấu hình/JWKS tin cậy). Cho token tự chỉ khóa = cho kẻ tấn công mang khóa của chính mình. Chi tiết và CVE thực tế ở [Algorithm Confusion — Deep Dive](/security/algorithm-confusion-deep-dive/).
+> Nguyên tắc chung của cả §7–§8: **token KHÔNG được tự quyết định nó verify bằng khóa nào.** Verifier giữ quyền chọn khóa (từ cấu hình/JWKS tin cậy). Cho token tự chỉ khóa = cho kẻ tấn công mang khóa của chính mình. Chi tiết và CVE thực tế ở [Algorithm Confusion — Deep Dive](/security/algorithm-confusion/).
 
 ---
 
@@ -440,7 +440,7 @@ Các lỗ hổng ở bài này không phải lý thuyết — chúng đã thành
 ```
 
 > [!IMPORTANT]
-> Lý do các CVE này lặp đi lặp lại qua nhiều thư viện trong nhiều năm: API verify "tiện" (chỉ `verify(token, key)`) khuyến khích thói quen sai (để lib tự đoán alg). Thư viện hiện đại buộc truyền `algorithms` chính là phản ứng với lớp CVE này. Khi chọn/nâng cấp thư viện JWT, ưu tiên loại **bắt buộc allowlist alg** và cập nhật bản vá. Chi tiết cơ chế confusion ở [Algorithm Confusion — Deep Dive](/security/algorithm-confusion-deep-dive/).
+> Lý do các CVE này lặp đi lặp lại qua nhiều thư viện trong nhiều năm: API verify "tiện" (chỉ `verify(token, key)`) khuyến khích thói quen sai (để lib tự đoán alg). Thư viện hiện đại buộc truyền `algorithms` chính là phản ứng với lớp CVE này. Khi chọn/nâng cấp thư viện JWT, ưu tiên loại **bắt buộc allowlist alg** và cập nhật bản vá. Chi tiết cơ chế confusion ở [Algorithm Confusion — Deep Dive](/security/algorithm-confusion/).
 
 ---
 
@@ -513,4 +513,4 @@ Các lỗ hổng ở bài này không phải lý thuyết — chúng đã thành
 2. **Verify là nhiều cổng, và decode không phải verify.** Kiểm chữ ký + alg + exp/nbf + aud + iss; mọi authz dựa trên `verify` chứ không `decode`.
 3. **Secret mạnh, payload sạch, TLS luôn bật.** Secret ≥256-bit ngẫu nhiên (hoặc RS256), không nhét bí mật vào payload, không để token rò ra log/URL.
 
-Đọc tiếp: [Algorithm Confusion — Deep Dive](/security/algorithm-confusion-deep-dive/) · [XSS/CSRF & Token Theft](/security/xss-csrf-token-theft/) · [Secure Storage](/security/secure-storage/) · [Security Best Practices](/security/security-best-practices/).
+Đọc tiếp: [Algorithm Confusion — Deep Dive](/security/algorithm-confusion/) · [XSS/CSRF & Token Theft](/security/xss-csrf-token-theft/) · [Secure Storage](/security/secure-storage/) · [Security Best Practices](/security/security-best-practices/).

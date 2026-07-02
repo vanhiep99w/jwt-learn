@@ -425,7 +425,7 @@ Một biến thể nguy hiểm hơn kết hợp với [algorithm-confusion](/sec
 ```
 
 <Callout type="error" title="Whitelist cả alg lẫn iss">
-Lỗi issuer confusion và algorithm confusion thường đi cùng nhau. Phòng thủ kép: (1) **whitelist thuật toán** ở verifier (chỉ RS256, không HS256), (2) **whitelist issuer** (chỉ accept iss từ danh sách cứng). Một trong hai lỏng lẻo → mở đường tấn công. Xem: [algorithm-confusion](/security/algorithm-confusion/) và [algorithm-confusion-deep-dive](/security/algorithm-confusion-deep-dive/).
+Lỗi issuer confusion và algorithm confusion thường đi cùng nhau. Phòng thủ kép: (1) **whitelist thuật toán** ở verifier (chỉ RS256, không HS256), (2) **whitelist issuer** (chỉ accept iss từ danh sách cứng). Một trong hai lỏng lẻo → mở đường tấn công. Xem: [algorithm-confusion](/security/algorithm-confusion/).
 </Callout>
 
 ### 8.3. Phòng thủ issuer confusion

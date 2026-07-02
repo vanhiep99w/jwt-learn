@@ -257,8 +257,9 @@ const { payload } = await jwtVerify(token, JWKS, {
   issuer: 'https://auth.example.com',     // P0: ghim iss
   audience: 'api.orders',                 // P0: ghim aud
   clockTolerance: '30s',                  // P1: leeway clock skew
-  requiredClaims: ['exp', 'sub', 'aud'],  // P0: bắt buộc claim
 });
+// jose không có requiredClaims — check thủ công claim bắt buộc (P0)
+if (payload.exp === undefined) throw new Error('exp required');
 ```
 
 Cookie chứa refresh token:

@@ -462,7 +462,7 @@ sequenceDiagram
 |---|-------------------|----------------|------------|
 | 1 | **Token giả từ Internet** | Gateway chặn ✓ | Gateway chặn ✓ + service chặn nếu leak |
 | 2 | **Service bị RCE, pivot sang service khác** | ❌ Service tin nội bộ → leak | ✅ Service đích re-verify + mTLS chặn |
-| 3 | **Sniff token trên mạng nội bộ** | ❌ Token forward 内 bộ → replay | ✅ Token không forward, header nội bộ ký |
+| 3 | **Sniff token trên mạng nội bộ** | ❌ Token forward nội bộ → replay | ✅ Token không forward, header nội bộ ký |
 | 4 | **Cross-tenant leak** | ❌ Gateway không biết tid resource | ✅ Fine-grained PEP ở service + RLS |
 
 ### 11.1. Kịch bản 2 chi tiết — pivot attack bị chặn
@@ -685,7 +685,7 @@ SAI:  Gateway check scope "invoices:read" → allow
 
 ## Tài liệu tham khảo
 
-- [NIST SP 800-207 — Zero Trust Architecture](https://datatracker.ietf.org/doc/html/rfc8725) — chuẩn Zero Trust chính thức.
+- [NIST SP 800-207 — Zero Trust Architecture](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf) — chuẩn Zero Trust chính thức.
 - [RFC 8725 — JSON Web Token Best Current Practices](https://datatracker.ietf.org/doc/html/rfc8725) — best practice JWT.
 - [Google BeyondCorp](https://cloud.google.com/beyondcorp) — case study Zero Trust thực chiến của Google.
 - Trong repo: [api-gateway-auth](/implementation/api-gateway-auth/) (strip+inject), [microservices-auth](/implementation/microservices-auth/) (mTLS + token exchange), [security-best-practices](/security/security-best-practices/), [jwt-threat-model](/security/jwt-threat-model/).

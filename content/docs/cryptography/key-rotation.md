@@ -520,4 +520,4 @@ async function verify(token) {
 2. **Pending tính theo độ trễ lan truyền THẬT.** Đợi ≥ MAX mọi lớp cache (app + CDN + multi-region) trước khi ký bằng khóa mới; cộng độ trễ này vào margin của overlap.
 3. **Rotate định kỳ khác rotate khẩn.** Bình thường tối ưu zero-downtime, gỡ khóa theo metric `verify{kid}≈0`; khi lộ khóa, đảo mục tiêu sang chặn ngay (gỡ khóa + revoke refresh + thu quyền KMS). Và để private key trong KMS/HSM để "lộ app" không thành "lộ khóa".
 
-Đọc kèm: [JWK & JWKS — Deep Dive](/cryptography/jwk-and-jwks/) (hạ tầng phát khóa) và [Token Validation Flow — Deep Dive](/internals/token-validation-deep-dive/) (verifier resolve key qua kid).
+Đọc kèm: [JWK & JWKS — Deep Dive](/cryptography/jwk-and-jwks/) (hạ tầng phát khóa) và [Token Validation Flow — Deep Dive](/internals/token-validation-flow/) (verifier resolve key qua kid).

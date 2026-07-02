@@ -309,7 +309,7 @@ Có hai cách triển khai hạ tầng multi-tenant, ảnh hưởng tới thiế
    │  │ t-A │ t-B │ t-C │ t-D │ ... │ (cùng DB)       │
    │  └─────┴─────┴─────┴─────┴─────┘                 │
    └──────────────────────────────────────────────────┘
-   → Tiết kiệm, dễ vận hành, ISolation logic (tid + RLS)
+   → Tiết kiệm, dễ vận hành, isolation logic (tid + RLS)
 ```
 
 ### 7.2. Dedicated tenancy (enterprise)
@@ -332,7 +332,7 @@ Có hai cách triển khai hạ tầng multi-tenant, ảnh hưởng tới thiế
 | Noisy neighbor | Có (1 tenant nặng kéo chậm mọi người) | Không |
 
 > [!TIP]
-> Hybrid phổ biến: đa số tenant dùng **shared** (rẻ), riêng vài tenant enterprise (y tế, tài chính) dùng **dedicated**. Auth server统 nhất vẫn cấp token có `tid`, nhưng định tuyến tenant enterprise về cụm riêng. Tức là thiết kế JWT không đổi, chỉ hạ tầng đằng sau thay đổi.
+> Hybrid phổ biến: đa số tenant dùng **shared** (rẻ), riêng vài tenant enterprise (y tế, tài chính) dùng **dedicated**. Auth server thống nhất vẫn cấp token có `tid`, nhưng định tuyến tenant enterprise về cụm riêng. Tức là thiết kế JWT không đổi, chỉ hạ tầng đằng sau thay đổi.
 
 ---
 
@@ -620,7 +620,7 @@ SAI:  đọc tid(token) rồi tin luôn → "user tenant-A, chắc truy cập da
 
 ## Tài liệu tham khảo
 
-- [RFC 9068 — JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens](https://datatracker.ietf.org/doc/html/rfc9068) — định nghĩa `tid` claim cho multi-tenant.
+- [RFC 9068 — JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens](https://datatracker.ietf.org/doc/html/rfc9068) — profile JWT cho access token; cho phép claim tuỳ chỉnh như `tid` (Azure AD, Auth0).
 - [RFC 8693 — OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693) — token exchange sang tenant khác.
 - [Supabase — Multi-tenant RLS Guide](https://supabase.com/docs/guides/auth/multi-tenancy) — pattern RLS thực chiến.
 - Trong repo: [microservices-auth](/implementation/microservices-auth/) (lan truyền tenant context), [api-gateway-auth](/implementation/api-gateway-auth/) (gateway strip+inject), [secure-storage](/security/secure-storage/) (token storage multi-tenant), [claims](/fundamentals/claims/).
