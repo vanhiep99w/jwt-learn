@@ -458,7 +458,7 @@ Bạn có nhiều bên VERIFY token khác nhau không?
 ```
 
 > [!IMPORTANT]
-> Dù chọn gì, verifier **luôn** phải ghim danh sách thuật toán cho phép (`algorithms: ['RS256']`). Trộn HMAC và bất đối xứng trong cùng một verifier mà không ghim alg → mở cửa đòn **RS256→HS256 confusion**. Xem [Algorithm Confusion — Deep Dive](/security/algorithm-confusion-deep-dive/).
+> Dù chọn gì, verifier **luôn** phải ghim danh sách thuật toán cho phép (`algorithms: ['RS256']`). Trộn HMAC và bất đối xứng trong cùng một verifier mà không ghim alg → mở cửa đòn **RS256→HS256 confusion**. Xem [Algorithm Confusion — Deep Dive](/security/algorithm-confusion/).
 
 ---
 

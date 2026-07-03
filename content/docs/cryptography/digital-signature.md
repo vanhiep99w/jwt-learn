@@ -240,7 +240,7 @@ Toán thật dùng `n` ~ 2048 bit (RSA-2048), `d`/`e` được sinh từ hai s�
 ### Kết quả trong JWT
 
 ```diagram
-RS256 → chữ ký dài 256 byte (base64url → 344 ký tự)
+RS256 → chữ ký dài 256 byte (base64url → 342 ký tự)
         → token to hơn HS256 nhiều (43 ký tự) — cái giá của verify công khai.
 ES256 (ECDSA) → 64 byte → nhỏ hơn, nhanh hơn, xem HMAC vs RSA vs ECDSA.
 ```
@@ -268,7 +268,7 @@ ES256 (ECDSA) → 64 byte → nhỏ hơn, nhanh hơn, xem HMAC vs RSA vs ECDSA.
 │   AI CŨNG ĐỌC ĐƯỢC — đây là điểm người mới sốc nhất.                     │
 └──────────────────────────────────────────────────────────────────────────┘
                                     .
-┌─ SIGNATURE (base64url, 344 ký tự với RS256) ─────────────────────────────┐
+┌─ SIGNATURE (base64url, 342 ký tự với RS256) ─────────────────────────────┐
 │ kT8x...2wE                                                               │
 │ = base64url( RSA-Sign(privateKey, SHA-256(header + "." + payload)) )     │
 │                                                                          │
@@ -300,7 +300,7 @@ sequenceDiagram
 ```
 
 > [!WARNING]
-> Bước "đọc `alg` từ header để chọn thuật toán verify" là **điểm nguy hiểm nhất**. Nếu server tin mù `alg` từ header, kẻ tấn công set `alg: none` (không ký) hoặc `alg: HS256` (khi server thực ra dùng RSA → nhầm public key thành HMAC secret) → giả token. Luôn **allowlist `alg` phía server**, xem [Algorithm Confusion — Deep Dive](/security/algorithm-confusion-deep-dive/).
+> Bước "đọc `alg` từ header để chọn thuật toán verify" là **điểm nguy hiểm nhất**. Nếu server tin mù `alg` từ header, kẻ tấn công set `alg: none` (không ký) hoặc `alg: HS256` (khi server thực ra dùng RSA → nhầm public key thành HMAC secret) → giả token. Luôn **allowlist `alg` phía server**, xem [Algorithm Confusion — Deep Dive](/security/algorithm-confusion/).
 
 ---
 

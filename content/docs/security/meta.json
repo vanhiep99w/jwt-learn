@@ -4,7 +4,6 @@
     "jwt-threat-model",
     "common-vulnerabilities",
     "algorithm-confusion",
-    "algorithm-confusion-deep-dive",
     "xss-csrf-token-theft",
     "secure-storage",
     "security-best-practices"

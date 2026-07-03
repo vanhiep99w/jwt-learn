@@ -231,7 +231,7 @@ Service B (verifier) ── secret S ──▶  verify token
 Kẻ tấn công có public key `(n, e)` nhưng **không** có `d`. Không có `d` thì không tính được `m^d mod n` — bài toán phân tích thừa số nguyên tố của `n` là bất khả thi với số đủ lớn. Đó là lý do public key công khai vô tư mà vẫn an toàn.
 
 > [!IMPORTANT]
-> Chính vì public key **công khai**, RS256 hợp với hệ phân tán: Auth Server giữ private key (ký), hàng chục microservice/SPA chỉ cần public key (verify) — và **không** service nào trong số đó giả được token. Nhưng đây cũng là gốc rễ của lỗi *algorithm confusion* (xem doc [Algorithm Confusion — Deep Dive](/security/algorithm-confusion-deep-dive/)).
+> Chính vì public key **công khai**, RS256 hợp với hệ phân tán: Auth Server giữ private key (ký), hàng chục microservice/SPA chỉ cần public key (verify) — và **không** service nào trong số đó giả được token. Nhưng đây cũng là gốc rễ của lỗi *algorithm confusion* (xem doc [Algorithm Confusion — Deep Dive](/security/algorithm-confusion/)).
 
 ---
 
@@ -471,4 +471,4 @@ const claims = jwt.verify(token, secret, { algorithms: ['HS256'] });
 2. **Đối xứng (HS) = ai verify được thì giả được; bất đối xứng (RS/ES/EdDSA) = chỉ người giữ private key mới ký được.** Chọn theo "ai được phép tạo token".
 3. **Luôn verify bằng thư viện + khai báo `algorithms` tường minh.** Tự viết verify hoặc tin `alg` từ header là con đường ngắn nhất tới sự cố bảo mật.
 
-Đọc tiếp: [Token Validation Flow — Deep Dive](/internals/token-validation-deep-dive/) để xem chữ ký này được kiểm tra ở bước nào trong cả pipeline verify.
+Đọc tiếp: [Token Validation Flow — Deep Dive](/internals/token-validation-flow/) để xem chữ ký này được kiểm tra ở bước nào trong cả pipeline verify.

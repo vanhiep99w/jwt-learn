@@ -131,7 +131,7 @@ Các giá trị phổ biến:
 ```
 
 > [!IMPORTANT]
-> **Đừng bao giờ tin `alg` trong header một cách mù quáng.** Kẻ tấn công có thể sửa `alg` thành `none` (bỏ ký) hoặc đổi `RS256` thành `HS256` (dùng public key làm HMAC secret) để bypass verification. Server **phải** cố định thuật toán ở phía server, không dùng giá trị `alg` từ token gửi lên. Xem chi tiết tại [Algorithm Confusion Attack](/docs/security/algorithm-confusion/).
+> **Đừng bao giờ tin `alg` trong header một cách mù quáng.** Kẻ tấn công có thể sửa `alg` thành `none` (bỏ ký) hoặc đổi `RS256` thành `HS256` (dùng public key làm HMAC secret) để bypass verification. Server **phải** cố định thuật toán ở phía server, không dùng giá trị `alg` từ token gửi lên. Xem chi tiết tại [Algorithm Confusion Attack](/security/algorithm-confusion/).
 
 ### 3.3. Trường `kid` — Khi server có nhiều key
 
@@ -697,7 +697,7 @@ Nếu cần ẩn nội dung → dùng **JWE**, hoặc đơn giản hơn: truyề
 - **Sai audience** (token cho service A, gửi sang service B)
 - **Replay attack** (token hợp lệ bị dùng lại)
 
-Verify signature chỉ là **bước 1** trong quy trình validate. Xem [Luồng xác thực JWT](/docs/internals/token-validation-flow/) để hiểu toàn bộ quy trình.
+Verify signature chỉ là **bước 1** trong quy trình validate. Xem [Luồng xác thực JWT](/internals/token-validation-flow/) để hiểu toàn bộ quy trình.
 
 ### 11.3. "Base64 = mã hóa"
 

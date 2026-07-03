@@ -49,7 +49,7 @@ Mọi mục cụ thể bên dưới đều là hệ quả của bốn nguyên t�
 ```
 
 > [!IMPORTANT]
-> Khi gặp một quyết định bảo mật không có trong checklist, hỏi bốn câu: *quyền này có tối thiểu chưa? có lớp phòng thủ nào khác đỡ không? mặc định đã an toàn chưa? lỗi thì có fail-closed không?* — đây là cách suy luận mọi best practice thay vì học thuộc danh sách. Bài này tổng hợp toàn bộ chuỗi Security ([Threat Model](/security/jwt-threat-model/), [Common Vulnerabilities](/security/common-vulnerabilities/), [Algorithm Confusion](/security/algorithm-confusion-deep-dive/), [XSS/CSRF](/security/xss-csrf-token-theft/), [Secure Storage](/security/secure-storage/)).
+> Khi gặp một quyết định bảo mật không có trong checklist, hỏi bốn câu: *quyền này có tối thiểu chưa? có lớp phòng thủ nào khác đỡ không? mặc định đã an toàn chưa? lỗi thì có fail-closed không?* — đây là cách suy luận mọi best practice thay vì học thuộc danh sách. Bài này tổng hợp toàn bộ chuỗi Security ([Threat Model](/security/jwt-threat-model/), [Common Vulnerabilities](/security/common-vulnerabilities/), [Algorithm Confusion](/security/algorithm-confusion/), [XSS/CSRF](/security/xss-csrf-token-theft/), [Secure Storage](/security/secure-storage/)).
 
 ---
 
@@ -167,7 +167,7 @@ Mọi mục cụ thể bên dưới đều là hệ quả của bốn nguyên t�
 ```
 
 > [!IMPORTANT]
-> 80% giá trị phòng thủ verify nằm ở hai dòng cấu hình: `algorithms: ['RS256']` + `{ issuer, audience }`, cộng "luôn `verify` không `decode`". Pipeline verify đầy đủ 6 cổng ở [Token Validation — Deep Dive](/internals/token-validation-deep-dive/); các lỗ hổng tương ứng ở [Common Vulnerabilities](/security/common-vulnerabilities/).
+> 80% giá trị phòng thủ verify nằm ở hai dòng cấu hình: `algorithms: ['RS256']` + `{ issuer, audience }`, cộng "luôn `verify` không `decode`". Pipeline verify đầy đủ 6 cổng ở [Token Validation — Deep Dive](/internals/token-validation-flow/); các lỗ hổng tương ứng ở [Common Vulnerabilities](/security/common-vulnerabilities/).
 
 ---
 
@@ -415,4 +415,4 @@ KHI REVIEW CODE LIÊN QUAN JWT, SOÁT:
 2. **Phòng thủ là nhiều lớp xuyên suốt vòng đời — không có viên đạn bạc.** TLS, chữ ký, verify đủ cổng, storage đúng, thu hồi, giám sát: mỗi lớp đỡ cho lớp khác khi thủng.
 3. **Đầu tư theo mức nhạy cảm, ưu tiên khóa ký + verify đúng.** Nền (TLS/verify/secret/storage) cho mọi hệ; leo thang biện pháp nặng (BFF, DPoP, step-up) chỉ khi dữ liệu/nghiệp vụ thực sự đòi hỏi.
 
-Đọc lại toàn cụm: [Threat Model](/security/jwt-threat-model/) · [Common Vulnerabilities](/security/common-vulnerabilities/) · [Algorithm Confusion](/security/algorithm-confusion-deep-dive/) · [XSS/CSRF & Token Theft](/security/xss-csrf-token-theft/) · [Secure Storage](/security/secure-storage/).
+Đọc lại toàn cụm: [Threat Model](/security/jwt-threat-model/) · [Common Vulnerabilities](/security/common-vulnerabilities/) · [Algorithm Confusion](/security/algorithm-confusion/) · [XSS/CSRF & Token Theft](/security/xss-csrf-token-theft/) · [Secure Storage](/security/secure-storage/).

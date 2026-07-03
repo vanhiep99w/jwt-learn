@@ -468,4 +468,4 @@ PHÒNG THỦ CHIỀU SÂU:
 - [Audience / Issuer / Subject](/internals/audience-issuer-subject/) — vai trò aud trong định tuyến tin cậy
 - [Migration Strategy](/operations/migration-strategy/) — xoay khóa JWKS không gián đoạn
 - [Observability & Audit](/operations/observability-and-audit/) — log/metric xác thực tập trung
-- [Token Validation Deep Dive](/internals/token-validation-deep-dive/) — pipeline verify
+- [Token Validation Deep Dive](/internals/token-validation-flow/) — pipeline verify

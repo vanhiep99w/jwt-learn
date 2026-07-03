@@ -200,7 +200,7 @@ Phần 1 (header) được Base64URL decode thành JSON:
 ╰─────────────────────────────────────────────────────────────────────╯
 ```
 
-Tại sao phải whitelist? Xem chi tiết cuộc tấn công tại [Algorithm Confusion](/docs/security/algorithm-confusion/).
+Tại sao phải allowlist? Xem chi tiết cuộc tấn công tại [Algorithm Confusion](/security/algorithm-confusion/).
 
 ### 4.3. Kiểm tra `typ`
 

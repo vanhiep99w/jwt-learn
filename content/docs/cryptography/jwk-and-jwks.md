@@ -97,7 +97,7 @@ JWK thắng ở chỗ: **tự mô tả** (kèm `kid`, `use`, `alg`), nhúng JSON
 | `x5t`/`x5t#S256` | Thumbprint của cert (SHA-1 / SHA-256) | Trỏ tới cert, **khác** JWK thumbprint (§9) |
 
 > [!NOTE]
-> `alg` và `use` trong JWK chỉ là **metadata gợi ý**. Verifier KHÔNG được phó mặc quyết định bảo mật cho chúng — luôn tự ghim `algorithms` của mình (xem [Algorithm Confusion — Deep Dive](/security/algorithm-confusion-deep-dive/)). Đừng nhầm `x5t` (thumbprint của *certificate*) với JWK Thumbprint RFC 7638 (thumbprint của *bản thân khóa*).
+> `alg` và `use` trong JWK chỉ là **metadata gợi ý**. Verifier KHÔNG được phó mặc quyết định bảo mật cho chúng — luôn tự ghim `algorithms` của mình (xem [Algorithm Confusion — Deep Dive](/security/algorithm-confusion/)). Đừng nhầm `x5t` (thumbprint của *certificate*) với JWK Thumbprint RFC 7638 (thumbprint của *bản thân khóa*).
 
 ---
 
@@ -308,7 +308,7 @@ Các tình huống biên cần xử lý đúng:
 | `kid` khớp nhưng `use="enc"` | Reject — sai mục đích khóa |
 
 > [!IMPORTANT]
-> `kid` chỉ là **gợi ý để chọn khóa**, không phải yếu tố bảo mật. Đừng nối thẳng `kid` vào path/SQL (đòn kid injection), và đừng "thử lần lượt mọi khóa" khi không khớp — chọn sai cách xử lý kid mở ra lỗ hổng (xem [Algorithm Confusion — Deep Dive §8](/security/algorithm-confusion-deep-dive/)).
+> `kid` chỉ là **gợi ý để chọn khóa**, không phải yếu tố bảo mật. Đừng nối thẳng `kid` vào path/SQL (đòn kid injection), và đừng "thử lần lượt mọi khóa" khi không khớp — chọn sai cách xử lý kid mở ra lỗ hổng (xem [Algorithm Confusion — Deep Dive §8](/security/algorithm-confusion/)).
 
 ---
 
@@ -440,7 +440,7 @@ x5t#S256 = SHA-256 thumbprint của cert lá  (nên dùng)
 
 ## 11. Bẫy bảo mật & walkthrough jku/jwk injection
 
-Vì verifier *tải khóa từ nguồn ngoài*, đây là vùng nhạy cảm nhất. Bảng tổng hợp (chi tiết đòn tấn công ở [Algorithm Confusion — Deep Dive](/security/algorithm-confusion-deep-dive/)):
+Vì verifier *tải khóa từ nguồn ngoài*, đây là vùng nhạy cảm nhất. Bảng tổng hợp (chi tiết đòn tấn công ở [Algorithm Confusion — Deep Dive](/security/algorithm-confusion/)):
 
 | Bẫy | Vì sao nguy hiểm | Phòng thủ |
 |-----|------------------|-----------|
