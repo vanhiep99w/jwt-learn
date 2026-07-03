@@ -143,7 +143,7 @@ Có ba cách phổ biến để thiết kế login cho web app. Mỗi cách là 
    │  (browser)  │  ◀── access_token ──── │              │
    │             │                        └──────────────┘
    │  token lưu: │
-   │  localStorage│  ── API call (Bearer) ─▶  Backend API
+   │ localStorage│  ── API call (Bearer) ─▶  Backend API
    └─────────────┘
 ```
 
@@ -177,7 +177,7 @@ Client tự giữ token trong `localStorage`, tự gắn `Authorization: Bearer`
    │  ┌───────────────────────────┐  │ ◀─────▶ │              │
    │  │ Render HTML + verify token│  │         └──────────────┘
    │  └───────────────────────────┘  │
-   │  cookie HttpOnly cho browser   │
+   │  cookie HttpOnly cho browser    │
    └────────────────┬────────────────┘
                     │  server gọi API (Bearer, từ server)
                     ▼
@@ -227,8 +227,8 @@ Dù chọn kiến trúc nào, nguyên tắc north-star là: <strong>JWT không n
    │   offline            │              │ • stateful, server   │
    │ • gửi mỗi request    │              │   phải tra DB        │
    │ • lộ = thiệt hại,    │              │ • lộ = THIỆT HẠI     │
-   │   nhưng giới hạn thời│              │   NGHIÊM TRỌNG (phiên │
-   │   gian (hết hạn nhanh)│             │   kéo dài)           │
+   │   nhưng giới hạn thời│              │   NGHIÊM TRỌNG (phiên│
+   │  gian (hết hạn nhanh)│              │   kéo dài)           │
    └──────────┬───────────┘              └──────────┬───────────┘
               │                                     │
               ▼                                     ▼
@@ -415,17 +415,17 @@ Web app login phải đối mặt **hai họ tấn công đối nghịch**, và 
    XSS (Cross-Site Scripting):           CSRF (Cross-Site Request Forgery):
    ┌────────────────────────────┐        ┌────────────────────────────┐
    │ Script độc chạy TRONG      │        │ Site khác lừa trình duyệt  │
-   │ trang nạn nhân             │        │ TỰ GỬI request kèm cookie │
+   │ trang nạn nhân             │        │ TỰ GỬI request kèm cookie  │
    │                            │        │                            │
-   │ Mục tiêu: ĐỌC token        │        │ Mục tiêu: dùng phiên để   │
-   │  (localStorage, biến JS)   │        │  THỰC HIỆN hành động      │
-   │                            │        │  (không cần đọc token)    │
-   │ Phòng: token nơi JS        │        │ Phòng: SameSite, CSRF     │
-   │  KHÔNG đọc được            │        │  token, Origin check      │
+   │ Mục tiêu: ĐỌC token        │        │ Mục tiêu: dùng phiên để    │
+   │  (localStorage, biến JS)   │        │  THỰC HIỆN hành động       │
+   │                            │        │  (không cần đọc token)     │
+   │ Phòng: token nơi JS        │        │ Phòng: SameSite, CSRF      │
+   │  KHÔNG đọc được            │        │  token, Origin check       │
    │  (httpOnly cookie)         │        │                            │
    └────────────────────────────┘        └────────────────────────────┘
         ▲                                          ▲
-        │            MÂUU THUẪN                     │
+        │            MÂUU THUẪN                    │
         └──────────────────────────────────────────┘
    httpOnly cookie chống XSS (JS không đọc)
    NHƯNG đẻ ra CSRF (cookie tự gửi cross-site)
@@ -766,7 +766,7 @@ SAI:  dùng 1 JWT dài hạn cho cả gọi API lẫn gia hạn
 
 ```diagram
 ╭────────────────────────────────────────────────────────────────────╮
-│           WEB APP LOGIN — CHEAT SHEET                               │
+│           WEB APP LOGIN — CHEAT SHEET                              │
 │                                                                    │
 │  Kiến trúc khuyến nghị: BFF (Backend-For-Frontend)                 │
 │     • token không bao giờ chạm trình duyệt                         │

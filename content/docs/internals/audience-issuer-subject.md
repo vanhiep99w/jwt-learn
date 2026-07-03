@@ -201,7 +201,7 @@ Nhiều developer mới dùng `sub = email` (`"sub": "anne@example.com"`). Đây
 
 ### 4.2. Vì sao phải check iss
 
-Một hệ thống có thể có **nhiều issuer** cùng dùng key verify (hoặc信任 cùng JWKS). Không check `iss` → token từ issuer lạ được chấp nhận.
+Một hệ thống có thể có **nhiều issuer** cùng dùng key verify (hoặctin tưởng cùng JWKS). Không check `iss` → token từ issuer lạ được chấp nhận.
 
 ```diagram
    Hệ thống có 2 auth server (test + prod), cùng key:
@@ -570,7 +570,7 @@ Tin tốt: `jsonwebtoken` (Node), PyJWT (Python), jjwt (Java) đều có option 
 │  iss  — Issuer   — ai phát hành token      (auth server URL)       │
 │  aud  — Audience — token dành cho ai       (service name)          │
 │                                                                    │
-│  Câu hỏi:  WHO (sub)? FROM (iss)? TO (aud)?                       │
+│  Câu hỏi:  WHO (sub)? FROM (iss)? TO (aud)?                        │
 ╰────────────────────────────────────────────────────────────────────╯
 ```
 

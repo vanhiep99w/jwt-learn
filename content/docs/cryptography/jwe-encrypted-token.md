@@ -452,7 +452,7 @@ Giống như verify JWS phải <b>allowlist <code>alg</code></b> để tránh [A
 | Decrypt mà KHÔNG pin `alg`/`enc` | Kẻ tấn công đổi header sang thuật toán yếu → downgrade attack | `keyManagementAlgorithms` + `contentEncryptionAlgorithms` tường minh |
 | Coi `iv`, `tag`, `header` là bí mật và "giấu" đi | Lầm khái niệm — chúng công khai theo thiết kế AEAD; giấu cũng vô dụng | Chỉ CEK và khóa người nhận là bí mật; mọi thứ khác đi kèm token |
 | Dùng `dir` với CEK = mật khẩu dễ đoán / short string | Brute-force → giải toàn bộ ciphertext | CEK phải là 32 byte ngẫu nhiên (cho A256GCM), lấy từ KMS/secret manager |
-| Tự implement AES-GCM + ghép JWE bằng tay | Sai iv长度, sai AAD, sai thứ tự phần → token "vừa encrypt xong đã không decrypt được" hoặc có lỗ hổng | Luôn dùng thư viện (`jose`); chỉ hiểu byte khi debug |
+| Tự implement AES-GCM + ghép JWE bằng tay | Sai ivchiều dài, sai AAD, sai thứ tự phần → token "vừa encrypt xong đã không decrypt được" hoặc có lỗ hổng | Luôn dùng thư viện (`jose`); chỉ hiểu byte khi debug |
 | Dùng JWE thay cho HTTPS | Payload "giấu" trong token nhưng request body/param khác vẫn rõ | JWE không thay TLS; JWE che payload token, TLS che toàn gói |
 | Trộn JWS và JWE header (`alg` vừa ký vừa enc) | Header JWE không có `signature` — verify sai ngữ nghĩa | Cần cả ký lẫn mã hoá → ký rồi encrypt (nesting), không trộn header |
 

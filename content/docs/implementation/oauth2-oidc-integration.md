@@ -47,19 +47,19 @@ Ba tháng sau, "module auth" vẫn chiếm phần lớn thời gian của 2 back
 
 ```diagram
 ╭──────────────────────────────────────────────────────────────────────────╮
-│                HỆ SINH THÁI XÁC THỰC HIỆN ĐẠI (TÓM TẮT)                    │
+│                HỆ SINH THÁI XÁC THỰC HIỆN ĐẠI (TÓM TẮT)                  │
 │                                                                          │
 │   OAuth 2.0            "Tôi cho phép app X truy cập tài nguyên Y         │
-│   (ủy quyền)            thay tôi"  →  cấp ACCESS TOKEN                    │
+│   (ủy quyền)            thay tôi"  →  cấp ACCESS TOKEN                   │
 │                                                                          │
 │   OpenID Connect       "Tôi là ai?"  →  cấp ID TOKEN (chứng minh danh    │
-│   (OIDC, lớp trên)      tính), mở rộng OAuth2 bằng login + userinfo       │
+│   (OIDC, lớp trên)      tính), mở rộng OAuth2 bằng login + userinfo      │
 │                                                                          │
-│   Provider (IdP)       Auth0, Keycloak, Cognito, Okta, Google, Azure AD   │
-│   = máy chủ trung tâm   — chạy giao thức trên, bạn chỉ tích hợp           │
+│   Provider (IdP)       Auth0, Keycloak, Cognito, Okta, Google, Azure AD  │
+│   = máy chủ trung tâm   — chạy giao thức trên, bạn chỉ tích hợp          │
 │                                                                          │
 │   Bạn (Relying Party)  Frontend (SPA/mobile) + Backend API               │
-│                          — chỉ gọi endpoint của provider, verify token    │
+│                          — chỉ gọi endpoint của provider, verify token   │
 ╰──────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -118,21 +118,21 @@ OIDC sửa điều đó bằng ID TOKEN:
 
 ```diagram
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  AI NHẬN TOKEN NÀO?  (quan trọng — nhầm là lỗ hổng)                       │
+│  AI NHẬN TOKEN NÀO?  (quan trọng — nhầm là lỗ hổng)                     │
 │                                                                         │
-│  ACCESS TOKEN   →  gửi tới API:   Authorization: Bearer <access>         │
+│  ACCESS TOKEN   →  gửi tới API:   Authorization: Bearer <access>        │
 │                   AI verify?       backend API                          │
-│                   để làm gì?       "token này được phép gọi API X"        │
+│                   để làm gì?       "token này được phép gọi API X"      │
 │                                                                         │
 │  REFRESH TOKEN  →  gửi tới PROVIDER: POST /oauth/token                  │
-│                   AI verify?       provider (Auth0/Keycloak/...)          │
-│                   để làm gì?       "cấp cho tôi access mới"              │
-│                   ⚠ KHÔNG gửi cho API của bạn                          │
+│                   AI verify?       provider (Auth0/Keycloak/...)        │
+│                   để làm gì?       "cấp cho tôi access mới"             │
+│                   ⚠ KHÔNG gửi cho API của bạn                           │
 │                                                                         │
-│  ID TOKEN       →  dùng tại CLIENT: đọc sub, email, tên → hiển thị UI    │
-│                   AI verify?       chính client (verify chữ ký provider)  │
-│                   để làm gì?       "người đăng nhập là alice"             │
-│                   ⚠ KHÔNG gửi cho API — API dùng access token            │
+│  ID TOKEN       →  dùng tại CLIENT: đọc sub, email, tên → hiển thị UI   │
+│                   AI verify?       chính client (verify chữ ký provider)│
+│                   để làm gì?       "người đăng nhập là alice"           │
+│                   ⚠ KHÔNG gửi cho API — API dùng access token           │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 

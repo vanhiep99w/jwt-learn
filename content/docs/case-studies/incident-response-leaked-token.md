@@ -11,7 +11,7 @@ description: "Runbook ứng phó sự cố SEV-1 khi JWT hoặc signing key bị
 - [2. Hai loại leak — hai cách xử khác nhau](#2-hai-loại-leak--hai-cách-xử-khác-nhau)
 - [3. Timeline sự cố — từ T+0 đến T+24h](#3-timeline-sự-cố--từ-t0-đến-t24h)
 - [4. Response playbook — 5 bước](#4-response-playbook--5-bước)
-  - [4.1. Bước 1 — Contain: dừng流血 ngay](#41-bước-1--contain-dừngliệu-ngay)
+  - [4.1. Bước 1 — Contain: dừngchảy máu ngay](#41-bước-1--contain-dừngliệu-ngay)
   - [4.2. Bước 2 — Rotate: cấp key/token mới](#42-bước-2--rotate-cấp-keytoken-mới)
   - [4.3. Bước 3 — Blast radius: ai đã lợi dụng?](#43-bước-3--blast-radius-ai-đã-lợi-dụng)
   - [4.4. Bước 4 — Communicate: thông báo user và stakeholder](#44-bước-4--communicate-thông-báo-user-và-stakeholder)
@@ -77,7 +77,7 @@ Không phải leak nào cũng giống nhau. Cách xử **phụ thuộc vào cái
 
 ```diagram
    ┌─────────────────────────────────────────────────────────────┐
-   │                  CÁI GÌ BỊ LỘ?                               │
+   │                  CÁI GÌ BỊ LỘ?                              │
    └───────────────────────┬─────────────────────────────────────┘
                            │
             ┌──────────────┴──────────────┐
@@ -88,7 +88,7 @@ Không phải leak nào cũng giống nhau. Cách xử **phụ thuộc vào cái
    └──────────┬──────────┘     └──────────┬───────────┘
               │                           │
    Mức:       │                   Mức:    │
-   SEV-1 █████│                SEV-2/3 ██  │
+   SEV-1 █████│                SEV-2/3 ██ │
    toàn hệ thống                       1 user / 1 session
               │                           │
               ▼                           ▼
@@ -104,7 +104,7 @@ Bảng so sánh nhanh — định nghĩa mức độ nghiêm trọng và cách x
 | **Mức** | SEV-1 (toàn hệ thống) | SEV-2 hoặc SEV-3 (1 user) |
 | **Ai bị ảnh hưởng?** | Mọi user (attacker giả vai bất kỳ ai) | 1 user / 1 session cụ thể |
 | **Token có tự hết hạn?** | Không — attacker tự ký token mới liên tục | Có — khi token tới `exp` |
-| **Cách dừng流血** | Rotate key + revoke key cũ | Add `jti` vào denylist |
+| **Cách dừngchảy máu** | Rotate key + revoke key cũ | Add `jti` vào denylist |
 | **Phải force re-login?** | Có — toàn bộ user | Chỉ user đó (nếu cần) |
 | **Điều tra** | Khó — key giả mạo pass verify | Dễ — `jti`/`sub` trace được trong log |
 | **Thời gian phục hồi** | Giờ đến ngày (rotation + redeploy) | Phút (1 DB insert) |
@@ -152,15 +152,15 @@ Chi tiết từng mốc:
 |-----|-----------|-----------|---------------------|------------------|
 | **Phát hiện** | T+0 | Alert tới (bot/user/sentry). **Verify leak thật** trước khi panic — đôi khi false positive. | On-call engineer | "Leak xác nhận: file X commit Y chứa key Z" |
 | **Triage** | T+15m | Declare SEV-1, paging Incident Commander, lập war room (Slack channel / Zoom). Freeze deploy lên production. | Incident Commander (IC) | War room mở, role giao rõ: IC, Comms, Scribe |
-| **Contain** | T+30m | **Dừng流血**: key cũ **ngừng ký token mới** ngay (chỉ verify). Token mới ký bằng key mới. | Auth team | Key cũ chỉ verify, không sign |
+| **Contain** | T+30m | **Dừngchảy máu**: key cũ **ngừng ký token mới** ngay (chỉ verify). Token mới ký bằng key mới. | Auth team | Key cũ chỉ verify, không sign |
 | **Rotate** | T+1h | Key mới live, JWKS publish cả 2 key (overlap). User cũ token vẫn dùng được, user login mới nhận key mới. | Auth team | New key hoạt động, 0 user bị kick |
 | **Revoke** | T+4h | Key cũ **gỡ khỏi JWKS** hoàn toàn. Mọi token do key cũ ký → fail verify → force re-login. | Auth team | Old tokens toàn bộ invalid |
-| **Blast radius** | T+4h → T+12h | Audit access log 60 ngày: token nào可疑? Session nào bất thường? Có data exfil không? | Security team | Danh sách user cần notify + data bị truy cập |
+| **Blast radius** | T+4h → T+12h | Audit access log 60 ngày: token nàođáng nghi? Session nào bất thường? Có data exfil không? | Security team | Danh sách user cần notify + data bị truy cập |
 | **Communicate** | T+6h → T+48h | Thông báo user bị ảnh hưởng, security disclosure nếu có (GDPR 72h). Status page. | Comms lead + Legal | User biết, regulatory clock chạy |
 | **Post-mortem** | T+24h → T+7 ngày | RCA (root cause analysis): **tại sao key vào repo?** Fix permanent (CI block, secret vault). | IC + toàn team | Report blameless, action items có owner |
 
 > [!IMPORTANT]
-> **Thứ tự bắt buộc: Contain TRƯỚC, hiểu nguyên nhân SAU.** Cảm xúc bình thường khi nổ là "ai làm? tại sao?" — nhưng đó là câu hỏi post-mortem. Trong 4 giờ đầu, câu hỏi duy nhất là "làm sao dừng流血 ngay". Đừng để chuyện tìm thủ phạm làm chậm việc rotate key. RCA blameless ở T+24h; giờ là lúc cứu.
+> **Thứ tự bắt buộc: Contain TRƯỚC, hiểu nguyên nhân SAU.** Cảm xúc bình thường khi nổ là "ai làm? tại sao?" — nhưng đó là câu hỏi post-mortem. Trong 4 giờ đầu, câu hỏi duy nhất là "làm sao dừngchảy máu ngay". Đừng để chuyện tìm thủ phạm làm chậm việc rotate key. RCA blameless ở T+24h; giờ là lúc cứu.
 
 ---
 
@@ -170,7 +170,7 @@ Năm bước dưới đây áp dụng cho **cả hai** kịch bản (key leak v�
 
 ```mermaid
 flowchart LR
-    A["1. CONTAIN<br/>dừng流血"] --> B["2. ROTATE<br/>key/token mới"]
+    A["1. CONTAIN<br/>dừngchảy máu"] --> B["2. ROTATE<br/>key/token mới"]
     B --> C["3. BLAST RADIUS<br/>ai bị ảnh hưởng?"]
     C --> D["4. COMMUNICATE<br/>thông báo"]
     D --> E["5. POST-MORTEM<br/>fix permanent"]
@@ -181,7 +181,7 @@ flowchart LR
     style E fill:#e2eaf5,stroke:#00a
 ```
 
-### 4.1. Bước 1 — Contain: dừng流血 ngay
+### 4.1. Bước 1 — Contain: dừngchảy máu ngay
 
 Mục tiêu: **ngăn thiệt hại lan rộng trong khi còn đang điều tra**. Không phải fix permanent — chỉ là "cầm máu".
 
@@ -267,7 +267,7 @@ export JWT_SIGNING_KID="kid-2026-07"
 Signing key leak khác mọi leak khác ở chỗ: **token giả mạo không khác biệt với token thật trong audit log**. Bạn không thể query "token nào là giả mạo" — vì chữ ký đúng hết. Phải dùng **indirect signal**: session từ IP lạ, token có `iat` bất thường, volume request đột biến, data access pattern lạ. Đây là lúc [observability và audit log](/operations/observability-and-audit/) cứu bạn — hoặc chỉ ra bạn nên chuẩn bị tốt hơn cho lần sau.
 </Callout>
 
-Tín hiệu可疑 trong log 60 ngày — query từng cái:
+Tín hiệuđáng nghi trong log 60 ngày — query từng cái:
 
 ```sql
 -- 1. Token cấp nhưng user KHÔNG có login event (attacker tự ký, không qua login)
@@ -304,7 +304,7 @@ Kết quả bước này cho biết: **ai cần được notify** (user bị m�
 ```diagram
    KẾT QUẢ BLAST-RADIUS → HÀNH ĐỘNG:
 
-   Tìm thấy token可疑?  ──── CÓ ───▶ Notify user bị mạo danh
+   Tìm thấy tokenđáng nghi?  ──── CÓ ───▶ Notify user bị mạo danh
                                     Audit data họ truy cập
                                     Đo lường thiệt hại (PII? financial?)
                           │
@@ -322,7 +322,7 @@ Im lặng là lỗicommunications lớn nhất khi sự cố. **User được th
 | Đối tượng | Khi nào | Nội dung | Kênh |
 |-----------|---------|----------|------|
 | **Internal** (engineering, exec) | T+30m | Leak xác nhận, SEV-1 declare, war room link | Slack #incident, email exec |
-| **User bị mạo danh** (nếu có) | T+6h | "Token của bạn bị滥用, chúng tôi đã revoke, vui lòng re-login" | Email cá nhân, in-app banner |
+| **User bị mạo danh** (nếu có) | T+6h | "Token của bạn bịlạm dụng, chúng tôi đã revoke, vui lòng re-login" | Email cá nhân, in-app banner |
 | **Toàn bộ user** (nếu signing key leak) | T+12h | "Lộ key, đã rotate, bạn có thể cần re-login, đổi password nếu lo" | Email + status page |
 | **Status page public** | T+2h | "Investigating security incident" → "Identified" → "Resolved" | status.yourcorp.com |
 | **Regulator** (GDPR/HIPAA) | T+0 + 72h | Nếu PII bị truy cập, **clock 72h chạy từ T+0** (khi bạn BIẾT) | Legal file báo cáo |
@@ -404,7 +404,7 @@ T+45m  _ROTATE bắt đầu: tạo key mới trong vault (kid-2026-07-02).
         Publish JWKS mới: {kid-old, kid-2026-07-02}. Đợi overlap.
 T+1h    Switch SIGN → kid-2026-07-02. Verify vẫn accept cả 2.
 T+2h    BLAST RADIUS: query log 60 ngày (mục 4.3).
-        Tìm thấy 2 session可疑 từ IP lạ cho user admin-3.
+        Tìm thấy 2 sessionđáng nghi từ IP lạ cho user admin-3.
         Notify admin-3, audit data truy cập.
 T+4h    REVOKE key cũ: gỡ kid-old khỏi JWKS.
         Mọi token kid-old → fail → force re-login toàn user.
@@ -440,7 +440,7 @@ T+15m   CONTAIN: INSERT vào token_denylist (jti của token leak)
 T+20m   Clean log: xóa/redact token trong Sentry, log aggregator, Slack
         (token có thể đã bị crawl, nhưng denylist chặn được)
 T+30m   BLAST RADIUS: query access log cho jti/sub đó trong cửa sổ leak→revoke.
-        Có request可疑 không? (thường KHÔNG — leak ngắn, attacker kịp ít)
+        Có requestđáng nghi không? (thường KHÔNG — leak ngắn, attacker kịp ít)
 T+45m   COMMUNICATE: notify user (sub) "token của bạn bị lộ trong log,
         đã revoke. Vui lòng re-login." (in-app, không cần email toàn user)
 T+1h    Đóng incident. SEV-3 nếu chỉ 1 user, không data exfil.
@@ -453,9 +453,9 @@ T+24h   POST-MORTEM nhỏ: tại sao log full header?
 
    Kịch bản A (key leak):               Kịch bản B (token leak):
    ┌────────────────────┐               ┌────────────────────┐
-   │ Attacker ký token  │               │ Attacker có 1 token │
-   │ mới liên tục       │               │ → dùng đến khi hết  │
-   │ → không bao giờ    │               │   hạn hoặc revoke   │
+   │ Attacker ký token  │               │ Attacker có 1 token│
+   │ mới liên tục       │               │ → dùng đến khi hết │
+   │ → không bao giờ    │               │   hạn hoặc revoke  │
    │   tự dừng          │               └────────────────────┘
    └────────────────────┘               Chặn = denylist 1 jti
    Chặn = rotate key (cấp             Phục hồi = phút
@@ -703,7 +703,7 @@ SAI:  "Ai commit cái này?!" → điều tra 2 giờ → key vẫn leak →
 ### 11.4. ❌ Co signing key leak như token leak
 
 ```text
-SAI:  Key leak → chỉ denylist vài token可疑. Key vẫn leak →
+SAI:  Key leak → chỉ denylist vài tokenđáng nghi. Key vẫn leak →
       attacker tự ký token mới → không bao giờ dứt.
 
 ĐÚNG: Key leak = rotate key + revoke key cũ. Token leak = denylist jti.
@@ -717,7 +717,7 @@ SAI:  Verify JWT không log gì. Khi leak: "không biết ai đã lợi dụng".
       Phải đoán mò, không notify đúng user, không đo được thiệt hại.
 
 ĐÚNG: Log mọi verify (kid, jti, sub, ip, path). Khi leak: query
-      signal可疑 (mục 4.3). Audit log là mắt của incident response.
+      signalđáng nghi (mục 4.3). Audit log là mắt của incident response.
 ```
 
 ### 11.6. ❌ Communicate quá muộn hoặc nói dối
@@ -816,7 +816,7 @@ Hai ADR quan trọng nhất cho incident response: **rotation tooling** và **de
 ╭──────────────────────────────────────────────────────────────────────╮
 │           INCIDENT RESPONSE — JWT LEAK — RUNBOOK                     │
 │                                                                      │
-│  CÂU HỎI ĐẦU TIÊN: cái gì bị lộ?                                    │
+│  CÂU HỎI ĐẦU TIÊN: cái gì bị lộ?                                     │
 │     • Signing key  → SEV-1, rotate key, revoke key cũ                │
 │     • Access token → SEV-2/3, denylist jti (hoặc chờ exp)            │
 │                                                                      │
@@ -833,7 +833,7 @@ Hai ADR quan trọng nhất cho incident response: **rotation tooling** và **de
 │                                                                      │
 │  KHÔNG LÀM:                                                          │
 │     ✗ force-push thay rotate  ✗ im lặng/giấu                         │
-│     ✗ tìm thủ phạm trước contain ✗ rotate không overlap               │
+│     ✗ tìm thủ phạm trước contain ✗ rotate không overlap              │
 │     ✗ "không data bị lộ" khi chưa blast-radius                       │
 ╰──────────────────────────────────────────────────────────────────────╯
 ```

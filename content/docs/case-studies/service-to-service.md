@@ -23,15 +23,15 @@ description: "Ca thiết kế end-to-end: authenticate giữa ba service nội b
 
 ## 1. Bối cảnh: ba service, câu hỏi "ai gọi ai, thay mặt ai?"
 
-Bạn làm kỹ sư cho **ShopLite** — nền tảng e-commerce đang lớn dần. Khi mới起步, mọi thứ nằm trong một monolith: tạo đơn hàng, trừ tiền, ghi sổ kế toán — cùng một process, gọi hàm nhau trực tiếp, không cần nghĩ về "danh tính" giữa chúng.
+Bạn làm kỹ sư cho **ShopLite** — nền tảng e-commerce đang lớn dần. Khi mớikhởi động, mọi thứ nằm trong một monolith: tạo đơn hàng, trừ tiền, ghi sổ kế toán — cùng một process, gọi hàm nhau trực tiếp, không cần nghĩ về "danh tính" giữa chúng.
 
 Một năm sau, monolith vỡ ra thành ba service:
 
 ```text
-┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-│ Order Service│─────▶│Payment Service│─────▶│ Ledger Service│
-│  tạo đơn     │ charge│   trừ tiền    │ entry │  ghi sổ kế toán│
-└──────────────┘      └──────────────┘      └──────────────┘
+┌──────────────┐      ┌───────────────┐      ┌──────────────┐
+│ Order Service│─────▶│Payment Service│─────▶│Ledger Service│
+│  tạo đơn     │charge│   trừ tiền    │ entry│ghi sổ kế toán│
+└──────────────┘      └───────────────┘      └──────────────┘
 ```
 
 Bây giờ, mỗi service chạy trong container riêng, gọi nhau qua HTTP. Và câu hỏi bảo mật xuất hiện:
