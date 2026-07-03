@@ -7,7 +7,7 @@ description: "Mổ xẻ chi tiết cách truyền và lưu JWT đúng chuẩn: v
 
 ## Mục lục
 
-- [1. Bối cảnh: token đúng nhưng vẫn bị đánh cắp](#1-bối-cảnh-token-đúng-nhưng-vẫn-bị-đánh-cắp)
+- [1. Token đã ký rồi — sao vẫn phải lo truyền và lưu?](#1-token-đã-ký-rồi--sao-vẫn-phải-lo-truyền-và-lưu)
 - [2. Tổng quan: vòng đời token trên đường truyền](#2-tổng-quan-vòng-đời-token-trên-đường-truyền)
 - [3. Hai câu hỏi tách biệt: truyền và lưu](#3-hai-câu-hỏi-tách-biệt-truyền-và-lưu)
 - [4. Truyền token: Authorization Bearer](#4-truyền-token-authorization-bearer)
@@ -33,17 +33,22 @@ description: "Mổ xẻ chi tiết cách truyền và lưu JWT đúng chuẩn: v
 
 ---
 
-## 1. Bối cảnh: token đúng nhưng vẫn bị đánh cắp
+## 1. Token đã ký rồi — sao vẫn phải lo truyền và lưu?
 
-Đội của bạn đã làm "đúng sách" phần mật mã: JWT ký bằng RS256, verify đủ `iss`/`aud`/`exp`, khóa xoay định kỳ. Vậy mà tháng sau, một khách hàng báo tài khoản bị truy cập trái phép — dù mật khẩu chưa bao giờ lộ. Truy vết, bạn phát hiện ba thứ:
+Nhiều đội tin rằng phần khó nhất của JWT là *ký và verify* đúng (RS256, kiểm `iss`/`aud`/`exp`, xoay khóa). Đó là quan niệm sai. Vì JWT là *bearer credential* — ai cầm được là dùng được — kẻ tấn công **không cần giả** token; chúng chỉ cần **lấy được một token thật**. Một token ký hoàn hảo vẫn vô dụng về mặt an toàn nếu nó rò qua access log, bị XSS đọc trộm, hay bị nghe lén trên đường truyền. Đó là lý do hai mắt xích thường bị bỏ quên — **truyền** (token đi từ đâu tới đâu, qua header hay cookie) và **lưu** (token nằm ở memory, cookie, hay storage) — lại quyết định độ an toàn thực tế.
 
-```text
-1) access_token=eyJ... xuất hiện trong access log của CDN (vì frontend cũ gắn token vào query string)
-2) refresh_token nằm trong localStorage → một thư viện analytics bị nhiễm đã đọc và gửi đi
-3) cookie phiên thiếu cờ Secure → bị sniff trên Wi-Fi công cộng ở sân bay
+Để thấy ba hướng rò phổ biến nhất, không cần phải dựng kịch bản; chỉ cần nhìn chỗ token dễ lọt ra ngoài:
+
+```diagram
+TRÊN URL          access_token=eyJ...?token=...
+                    → access log của server/proxy/CDN giữ hàng tháng, rò qua Referer
+TRONG STORAGE     refresh_token nằm localStorage
+                    → mọi đoạn JS trên trang (kể cả thư viện bên thứ ba bị nhiễm) đọc được
+COOKIE THIẾU cờ   Set-Cookie: token=... (không có Secure)
+                    → gửi qua HTTP, bị sniff trên Wi-Fi công cộng
 ```
 
-Không một lỗi nào ở trên thuộc về "ký/verify". Chúng đều thuộc tầng **truyền** (transport) và **lưu** (storage) — tầng mà nhiều đội xem nhẹ vì "token đã ký rồi thì sao mà giả được". Sự thật: kẻ tấn công **không cần giả** token; chúng chỉ cần **lấy được** một token thật. Một JWT ký hoàn hảo vẫn vô dụng về mặt an toàn nếu nó rò qua log, bị XSS đọc, hay bị nghe lén trên đường truyền.
+Cả ba đều không liên quan gì tới ký/verify. Chúng thuộc về *truyền* và *lưu*. Câu hỏi thực mà doc này giải: **truyền token qua header thế nào cho an toàn, và cất ở đâu để không bị ăn cắp** — ngay cả khi chữ ký hoàn hảo.
 
 > [!IMPORTANT]
 > Bảo mật JWT là một chuỗi: **cấp → truyền → lưu → gửi lại → verify → thu hồi**. Mắt xích yếu nhất quyết định độ an toàn. Doc này tập trung vào hai mắt xích hay bị bỏ quên nhất — *truyền* và *lưu* — và gắn mỗi quyết định kỹ thuật với một mối đe dọa cụ thể (nghe lén, XSS, CSRF, rò log).

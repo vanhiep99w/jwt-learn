@@ -7,7 +7,7 @@ description: "Thiết kế JWT cho SaaS nhiều tenant — từ isolation bằng
 
 ## Mục lục
 
-- [Bối cảnh: công ty A đọc được bill của công ty B](#1-bối-cảnh-công-ty-a-đọc-được-bill-của-công-ty-b)
+- [Bài toán: 1000 tenant, một bộ code — cách ly thế nào?](#1-bài-toán-1000-tenant-một-bộ-code--cách-ly-thế-nào)
 - [Multi-tenant là gì — và vì sao JWT khó hơn](#2-multi-tenant-là-gì--và-vì-sao-jwt-khó-hơn)
 - [Bài toán 1: Định danh tenant — claim `tid` và `tenant_id`](#3-bài-toán-1-định-danh-tenant--claim-tid-và-tenant_id)
 - [Bài toán 2: Phân quyền theo tenant — scope có namespace](#4-bài-toán-2-phân-quyền-theo-tenant--scope-có-namespace)
@@ -23,25 +23,11 @@ description: "Thiết kế JWT cho SaaS nhiều tenant — từ isolation bằng
 
 ---
 
-## 1. Bối cảnh: công ty A đọc được bill của công ty B
+## 1. Bài toán: 1000 tenant, một bộ code — cách ly thế nào?
 
-Bạn vận hành một nền tảng SaaS B2B — kiểu Stripe / Notion / Slack — nơi **hàng nghìn tổ chức** (tenant) cùng dùng một bộ code, một database. Mỗi tenant là một "công ty khách hàng": có user riêng, dữ liệu riêng, bill riêng, quyền riêng.
+Bạn vận hành một nền tảng SaaS B2B — kiểu Stripe / Notion / Slack — phục vụ **hàng nghìn tổ chức** (tenant) cùng lúc: chung một bộ code, chung một database, chung hạ tầng. Mỗi tenant là một "công ty khách hàng": có user riêng, dữ liệu riêng, bill riêng, quyền riêng. Giá trị cốt lõi bạn bán cho khách hàng là một lời hứa: **dữ liệu của họ không bao giờ lọt sang tổ chức khác**.
 
-Một sáng, support chuyển tới một ticket khủng khiếp:
-
-```text
-Từ: admin@acme-corp.com (tenant A)
-Tiêu đề: TÔI VỪA THẤY HÓA ĐƠN CỦA GLOBEX!!!
-
-Anh ta paste một URL:
-   GET /api/invoices/inv_5f8a2c
-   → trả về hóa đơn của GlobEx (tenant B), không phải Acme
-
-Và tệ hơn — anh ta thử /api/invoices/inv_5f8a2d, inv_5f8a2e...
-   → đọc được cả chục hóa đơn của công ty khác.
-```
-
-Hệ thống của bạn vừa bị **cross-tenant data leak** — lỗ hổng chết người của mọi SaaS multi-tenant. Khi support hỏi engineering, câu trả lời đáng sợ là: *"Mọi service đều verify JWT kỹ mà — nhưng không service nào kiểm tra **token này thuộc tenant nào, resource đó thuộc tenant nào, có khớp không**."*
+Đó là bài toán **tenant isolation**. Nó khó không phải vì thiếu công cụ, mà vì cách ly phải đúng ở **từng lớp** — từ token (JWT mang danh tính tenant), qua service (kiểm tra ranh giới tenant), đến DB (filter theo tenant_id). Sai một lớp, dữ liệu rò rỉ. Và khi đã rò rỉ, hậu quả là **cross-tenant data leak** — lỗi chết người của SaaS multi-tenant: user tenant A gõ một URL và đọc được bill của tenant B, vì không service nào check "token này thuộc tenant nào, resource đó thuộc tenant nào, có khớp không".
 
 ```diagram
    User tenant A đăng nhập → token ghi tid: "tenant-A"
@@ -57,8 +43,7 @@ Hệ thống của bạn vừa bị **cross-tenant data leak** — lỗ hổng c
    ❌ Trả bill tenant B cho user tenant A   ← LEAK
 ```
 
-> [!IMPORTANT]
-> Trong SaaS multi-tenant, **verify JWT kỹ chưa đủ**. Lỗi không nằm ở chữ ký hay expiration — nó nằm ở chỗ **không ai kiểm tra ranh giới tenant**: token thuộc tenant A nhưng lại được dùng để truy cập resource của tenant B. Đây là lỗi top-1 multi-tenant, và là lỗi có thể giết cả công ty. Doc này mổ xẻ cách thiết kế JWT sao cho **tenant isolation** là điều kiểm tra đầu tiên, không phải điều bỏ quên cuối.
+Lỗi này không nằm ở chữ ký hay expiration — nó nằm ở chỗ **không ai kiểm tra ranh giới tenant**. Đây là lỗi top-1 multi-tenant, và là lỗi có thể giết cả công ty. Doc này mổ xẻ cách thiết kế JWT sao cho tenant isolation là điều kiểm tra đầu tiên, không phải điều bỏ quên cuối.
 
 ---
 

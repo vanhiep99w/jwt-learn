@@ -7,7 +7,7 @@ description: "JWT trong microservices siêu chi tiết: edge-only vs zero-trust,
 
 ## Mục lục
 
-- [1. Bối cảnh: một SSRF mở toang cả cụm](#1-bối-cảnh-một-ssrf-mở-toang-cả-cụm)
+- [1. Một request đi qua 5 service — tin dựa vào đâu?](#1-một-request-đi-qua-5-service--tin-dựa-vào-đâu)
 - [2. Tổng quan: hai trục danh tính](#2-tổng-quan-hai-trục-danh-tính)
 - [3. Hai mô hình tin tưởng: edge-only vs zero-trust](#3-hai-mô-hình-tin-tưởng-edge-only-vs-zero-trust)
 - [4. Truyền danh tính người dùng giữa các service](#4-truyền-danh-tính-người-dùng-giữa-các-service)
@@ -25,24 +25,20 @@ description: "JWT trong microservices siêu chi tiết: edge-only vs zero-trust,
 
 ---
 
-## 1. Bối cảnh: một SSRF mở toang cả cụm
+## 1. Một request đi qua 5 service — tin dựa vào đâu?
 
-Một hệ thống có 20 microservice trong cùng cluster Kubernetes. Đội tin rằng "mạng nội bộ là an toàn", nên chỉ API Gateway verify JWT; các service nội bộ gọi nhau qua HTTP thường và **đọc danh tính từ header** `X-User-Id`, `X-User-Role` mà gateway tiêm vào.
+Trong kiến trúc microservices, một request người dùng đi qua gateway rồi rẽ vào nhiều service phía sau. Ví dụ thao tác "đặt hàng": `gateway → order-svc → payment-svc → ledger-svc`, có thể thêm `inventory-svc`, `notification-svc` cùng chặng. Ở mỗi chặng, service nhận request đều phải trả lời ba câu:
 
-Một service xử lý ảnh có lỗ hổng SSRF (Server-Side Request Forgery): attacker khiến nó gửi request HTTP tùy ý. Vì service này nằm *trong* cluster, attacker dùng nó làm bàn đạp:
+- **Request này đến từ ai?** — user nào bấm nút, hay một service nào đang gọi?
+- **Danh tính đó tin dựa vào đâu?** — chữ ký JWT, chứng chỉ mTLS, hay... một header do chặng trước đặt?
+- **Mạng nội bộ có đủ để bỏ qua câu trên không?** — hay chỉ là giả định nguy hiểm?
 
-```text
-Attacker → SSRF ở image-svc → gọi nội bộ:
-   POST http://admin-svc/users/promote
-   X-User-Id: 1
-   X-User-Role: admin        ← attacker tự đặt, admin-svc TIN vì "đến từ nội bộ"
-→ admin-svc tin header (không verify token) → nâng quyền tài khoản attacker → chiếm hệ thống
-```
+Câu hỏi cuối chính là điểm nhiều đội chọn nhầm: vì "các service đều ở trong cluster, gọi nhau qua mạng kín", người ta chỉ verify ở gateway rồi truyền danh tính vào các header như `X-User-Id`, `X-User-Role`. Đơn giản, nhưng tin tưởng đó không có chữ ký nào chứng minh — bất kỳ service nào bị lỗ hổng (SSRF, RCE) đều có thể mạo danh người dùng khác (xem chi tiết ở [mục 9](#9-bẫy-tin-tưởng-mạng-nội-bộ)).
 
-Không có JWT nào bị giả. Không có khóa nào bị lộ. Lỗ hổng nằm ở **giả định tin tưởng**: "trong mạng nội bộ thì khỏi verify". Một SSRF/RCE ở *một* service biến thành quyền truy cập *toàn hệ thống* (lateral movement).
+Hướng an toàn là **zero-trust**: mỗi service tự verify token (chữ ký + `iss` + `aud` của chính nó), lấy danh tính và quyền hạn từ claim đã ký chứ không từ header chưa ký. Doc này đi qua các mô hình truyền danh tính giữa service — forward JWT, token-exchange, client credentials, mTLS — và khi nào dùng cái nào.
 
 > [!IMPORTANT]
-> Trong microservices, một request người dùng đi qua nhiều service, và mỗi service phải trả lời: *Request này đến từ ai?* (user nào), *Service gọi tôi là ai?* (service nào), *Tôi có nên tin không?*. Câu trả lời an toàn: **mỗi service tự verify**, không tin mù mạng nội bộ hay header chưa ký. Đó là **zero-trust**.
+> Trong microservices, mỗi request đi qua nhiều service và mỗi service phải tự trả lời: *ai gọi tôi*, *thay mặt ai*, *có nên tin không*. Trả lời an toàn là **mỗi service tự verify** — không tin mù mạng nội bộ hay header chưa ký.
 
 ---
 

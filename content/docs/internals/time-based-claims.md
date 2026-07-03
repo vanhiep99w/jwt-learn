@@ -7,7 +7,7 @@ description: "Mổ xẻ 3 claim thời gian của JWT — exp (khi nào hết h�
 
 ## Mục lục
 
-- [Câu chuyện mở đầu: token không bao giờ hết hạn](#1-câu-chuyện-mở-đầu-token-không-bao-giờ-hết-hạn)
+- [Ba claim quyết định khi nào token sống — và khi nào chết](#1-ba-claim-quyết-định-khi-nào-token-sống--và-khi-nào-chết)
 - [Ba claim thời gian — cái nào làm gì](#2-ba-claim-thời-gian--cái-nào-làm-gì)
 - [exp — khi nào token hết hạn, và vì sao quan trọng nhất](#3-exp--khi-nào-token-hết-hạn-và-vì-sao-quan-trọng-nhất)
 - [nbf — khi nào token bắt đầu có hiệu lực](#4-nbf--khi-nào-token-bắt-đầu-có-hiệu-lực)
@@ -21,41 +21,30 @@ description: "Mổ xẻ 3 claim thời gian của JWT — exp (khi nào hết h�
 
 ---
 
-## 1. Câu chuyện mở đầu: token không bao giờ hết hạn
+## 1. Ba claim quyết định khi nào token sống — và khi nào chết
 
-Một startup fintech xây dựng app ví điện tử. Token access họ cấp... **không có `exp`**. Lý do? *"Cho người dùng tiện, khỏi phải đăng nhập lại."* Mọi request chỉ check chữ ký và `sub` — không kiểm tra thời gian.
+Một JWT access token không tự biết khi nào "hết hạn" — nó chỉ là một chuỗi ký tự có chữ ký. Vòng đời của token (sinh ra, bắt đầu có hiệu lực, hết hạn) do **ba claim thời gian** quyết định: `iat`, `nbf`, `exp`. Trong ba cái đó, `exp` (expiration) là quan trọng nhất và đáng được để ý nhất.
 
-Sáu tháng sau, một user báo:
+Bỏ quên `exp` là lỗi sơ đẳng nhưng vẫn gặp: token sinh ra mà không có hạn dùng thì nó **sống vĩnh viễn**. Một khi bị lộ — qua header `Authorization` sniff trên WiFi công cộng, qua log bị leak, qua XSS — kẻ tấn công giữ token đó dùng được mãi mãi, cho đến khi admin chủ động revoke (mà nhiều hệ thống còn không có cơ chế revoke). Token bị lộ lại thường không được phát hiện ngay, nên hậu quả thường nặng nề.
 
-```text
-Từ: user_abc@...
-Tiêu đề: TÔI BỊ TRỪ TIỀN MÀ KHÔNG PHẢI TÔI
-
-- Tối qua 23:00 tôi ngủ, điện thoại để ở nhà
-- 23:14: tài khoản tôi chuyển 5.000.000đ đi một tài khoản lạ
-- Tôi không hề mở app
-```
-
-Investigation mở ra. Hóa ra 3 tháng trước, một token của user này bị lộ (qua một proxy công cộng WiFi, bắt được trong header `Authorization`). Vì token **không có `exp`**, nó **sống vĩnh viễn** — kẻ tấn công giữ lấy, đến 3 tháng sau mới dùng, vẫn hợp lệ. Chữ ký đúng, `sub` đúng → server xử lý chuyển tiền.
+Để dễ hình dung vị trí của ba claim trên dòng thời gian của một token:
 
 ```diagram
-   01/01: user đăng nhập → nhận access token (KHÔNG có exp)
-          ┌─────────────────────────────┐
-          │ token: sub=user_abc         │
-          │        (không có exp!)      │  ← "sống vĩnh viễn"
-          └─────────────────────────────┘
-                    │
-   01/03: user dùng WiFi công cộng
-          → kẻ tấn công sniff được token
-          → giữ token (vì không hết hạn, giữ bao lâu cũng được)
-                    │
-   01/06 23:14: kẻ tấn công dùng token cũ
-          → server: chữ ký ✓, sub ✓, (không check thời gian)
-          → xử lý chuyển tiền  💀
+   Dòng thời gian của một token:
+   ─────┬───────────┬───────────────────────┬──────────►
+        │ iat       │ nbf                   │ exp
+        │           │                       │
+   (phát hành)  (bắt đầu      |     (hết hạn —
+                 hiệu lực)    │      reject mọi request)
+                               │
+                     ← khoảng token hợp lệ →
 ```
 
-> [!IMPORTANT]
-> `exp` (expiration) là **claim quan trọng nhất** của một JWT access token. Không có `exp` = token sống vĩnh viễn = một khi bị lộ, kẻ tấn công dùng được mãi mãi cho đến khi admin chủ động revoke (mà nhiều hệ thống còn không có cơ chế revoke). Đây là lỗi sơ đẳng nhưng vẫn gặp — và hậu quả luôn nặng nề vì token bị lộ thường không được phát hiện ngay. Doc này mổ xẻ 3 claim thời gian của JWT và bài toán đồng hồ đi kèm.
+- **`iat`** (Issued At) — thời điểm token được phát hành, chỉ mang ý nghĩa ghi chú.
+- **`nbf`** (Not Before) — token chỉ bắt đầu có hiệu lực từ thời điểm này (trước đó verifier phải reject).
+- **`exp`** (Expiration) — thời điểm token hết hạn, sau đó verifier phải reject. Đây là ranh giới sống chết.
+
+Doc này mổ xẻ chi tiết ba claim trên, cùng bài toán đồng hồ đi kèm: clock skew giữa server và client, replay attack khi token bị dùng lại, và TTL chuẩn cho từng loại token.
 
 ---
 

@@ -7,7 +7,7 @@ description: "Nền tảng của mọi bảo mật JWT: chữ ký số là gì, 
 
 ## Mục lục
 
-- [Sự cố: token bị sửa 1 chữ cái, toàn hệ thống bị chiếm quyền admin](#1-sự-cố-token-bị-sửa-1-chữ-cái-toàn-hệ-thống-bị-chiếm-quyền-admin)
+- [Chữ ký số bảo vệ điều gì — và không bảo vệ điều gì](#1-chữ-ký-số-bảo-vệ-điều-gì--và-không-bảo-vệ-điều-gì)
 - [Chữ ký số giải quyết bài toán nào](#2-chữ-ký-số-giải-quyết-bài-toán-nào)
 - [Ba thuộc tính an ninh mà chữ ký phải đảm bảo](#3-ba-thuộc-tính-an-ninh-mà-chữ-ký-phải-đảm-bảo)
 - [Hash function — viên gạch đầu tiên](#4-hash-function--viên-gạch-đầu-tiên)
@@ -24,37 +24,24 @@ description: "Nền tảng của mọi bảo mật JWT: chữ ký số là gì, 
 
 ---
 
-## 1. Sự cố: token bị sửa 1 chữ cái, toàn hệ thống bị chiếm quyền admin
+## 1. Chữ ký số bảo vệ điều gì — và không bảo vệ điều gì
 
-Một bug rất phổ biến: trang admin của họ chặn theo giá trị `role` **nằm trong payload JWT** — frontend decode payload (base64url) ra JSON, đọc `role`, nếu là `"admin"` thì hiện nút. Logic kiểm tra quyền **chỉ ở client**.
+Trước khi đi vào hash hay thuật toán, cần gỡ ngay hiểu lầm phổ biến nhất: **chữ ký JWT không mã hoá gì cả.**
 
-```diagram
-Token ban đầu (payload base64url decode ra):
-   { "sub": "user-42", "role": "user", "exp": 1735689600 }
+Payload của JWT chỉ là JSON được base64url — ai chặn được token cũng đọc được nội dung bằng mắt thường (bỏ vào jwt.io là thấy). Vậy chữ ký — phần thứ ba ở cuối token — tồn tại để làm gì? Chỉ để trả lời đúng **một** câu hỏi: *"token này có đúng do người giữ khóa tạo ra, và chưa bị sửa một bit nào không?"* Nói cách khác, chữ ký bảo vệ hai thứ: **toàn vẹn** (nội dung không bị xáo trộn) và **nguồn gốc** (do đúng server phát). Còn **bí mật** thì nó không đụng tới.
 
-Kẻ tấn công làm gì:
-   1. Bỏ token vào jwt.io → thấy payload là JSON rõ
-   2. Sửa "role":"user" → "role":"admin"
-   3. Base64url lại payload → ghép vào token
-   4. … nhưng CHỮ KÝ không khớp nữa (vì payload đã đổi)
+Thử nhanh để thấy ranh giới đó. Lấy một token đang dùng tốt, decode payload ra `{"sub":"user-42","role":"user"}`, đổi `user` thành `admin`, base64url lại rồi gửi lên server:
+
+```text
+401 Unauthorized — invalid signature
 ```
 
-Đến đây có hai kịch bản, và đó là ranh giới sống/còn của JWT:
-
-```diagram
-KỊCH BẢN A — server verify ĐÚNG (may mắn):
-   server tính lại chữ ký trên payload đã sửa → KHÔNG khớp → 401
-   → token giả bị reject, hệ thống an toàn.
-
-KỊCH BẢN B — server KHÔNG verify (thảm họa thực tế):
-   server tin payload, không kiểm chữ ký (hoặc alg:none, xem bên dưới)
-   → token giả được chấp nhận → "user-42" thành admin mà không cần mật khẩu.
-```
-
-Sự cố thật luôn ở kịch bản B. Lỗi không phải JWT "không an toàn" — mà là **server quên (hoặc bị lừa) kiểm chữ ký**. JWT không có chữ ký thì chỉ là một mẩu JSON dán băng keo — ai cũng gỡ ra sửa rồi dán lại.
+Chỉ đổi **đúng một từ** trong phần ai cũng đọc được, server phát hiện ngay — vì chữ ký được tính từ **chính xác từng byte** của header và payload, đổi 1 bit là hash đổi hoàn toàn → chữ ký không khớp. Bạn *đọc* được payload, nhưng *sửa* thì không qua mặt được ai. Cùng một thí nghiệm mà nếu server quên kiểm chữ ký (hoặc bị lừa nhận `alg: none`) thì token giả lọt — đó là lỗi ở phía server, không phải JWT "không an toàn".
 
 > [!IMPORTANT]
-> Toàn bộ niềm tin vào một JWT nằm ở **một chuỗi chữ ký ở cuối token**. Nếu server không kiểm nó (hoặc kiểm sai), JWT tụt từ "chống giả" xuống "tệ hơn cả cookie thường" — vì cookie thường ít nhất còn do server sinh, còn payload JWT thì client đọc được nên client cũng biết đường sửa. Doc này mổ xẻ chữ ký số từ viên gạch (hash) tới chữ ký hoàn chỉnh, để bạn hiểu vì sao đúng 40 byte cuối của token lại giữ cả hệ thống đứng vững.
+> Chữ ký JWT bảo vệ **toàn vẹn & nguồn gốc**, KHÔNG bảo vệ **bí mật**. Hiểu sai điều này dẫn tới hai lỗi chết người: (1) nhét secret/PII vào payload tưởng được giấu, (2) tin payload mà chưa verify chữ ký. Toàn bộ niềm tin vào một JWT nằm ở đúng chuỗi chữ ký ở cuối token — bỏ qua nó, JWT tụt từ "chống giả" xuống "tệ hơn cả cookie thường", vì payload client đọc được nên client cũng biết đường sửa.
+
+Doc này mổ chữ ký số từ viên gạch (hash) tới chữ ký hoàn chỉnh (HMAC, RSA/ECDSA), để bạn hiểu vì sao đúng vài chục byte cuối của token lại giữ cho cả payload đứng vững.
 
 ---
 
