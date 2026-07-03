@@ -7,7 +7,7 @@ description: "Triển khai JWT đầy đủ cho REST API: kiến trúc tầng au
 
 ## Mục lục
 
-- [1. Bối cảnh: ba lỗ hổng kinh điển ở tầng verify](#1-bối-cảnh-ba-lỗ-hổng-kinh-điển-ở-tầng-verify)
+- [1. Verify JWT ở backend không phải một lời gọi `verify()`](#1-verify-jwt-ở-backend-không-phải-một-lời-gọi-verify)
 - [2. Tổng quan: decode ≠ verify ≠ authorize](#2-tổng-quan-decode--verify--authorize)
 - [3. Kiến trúc tầng auth trong API](#3-kiến-trúc-tầng-auth-trong-api)
 - [4. Middleware xác thực (authenticate)](#4-middleware-xác-thực-authenticate)
@@ -31,27 +31,22 @@ description: "Triển khai JWT đầy đủ cho REST API: kiến trúc tầng au
 
 ---
 
-## 1. Bối cảnh: ba lỗ hổng kinh điển ở tầng verify
+## 1. Verify JWT ở backend không phải một lời gọi `verify()`
 
-Một service "có verify JWT" chưa chắc an toàn. Đây là ba sự cố thật, đều bắt nguồn từ verify *thiếu*:
+Khi nhắc "verify JWT", nhiều người hình dung một lời gọi `jwt.verify(token, key)` rồi xong. Thực tế đó mới là chữ ký — còn một mảng checklist phải làm đúng thì token mới *thực sự tin được*:
 
-```text
-Sự cố A — alg:none
-  Service dùng thư viện verify nhưng KHÔNG truyền allowlist algorithms.
-  Attacker gửi token với header {"alg":"none"} và không có chữ ký.
-  → Thư viện "tôn trọng" alg=none, bỏ qua verify chữ ký → token giả được chấp nhận.
+- Đọc `Authorization: Bearer ...` đúng cách (tách scheme, không bóc chuỗi).
+- Truyền **allowlist `algorithms`** cứng, không tin giá trị `alg` trong chính header token.
+- Kiểm đủ claim: `iss`, `aud`, `exp`, `nbf` (mỗi cái chống một kiểu tấn công khác nhau).
+- Nạp khóa từ JWKS có **cache + refetch theo `kid`** để verify nhanh và không giết throughput.
 
-Sự cố B — quên kiểm aud
-  Token do IdP cấp cho service "billing" lại được service "admin" chấp nhận
-  vì admin không kiểm `aud`. Một user thường có token billing hợp lệ
-  → dùng luôn được API admin.
+Bỏ sót mục nào, token "verify OK trên jwt.io" vẫn thủng. Ba bẫy kinh điển đều rơi đúng vào checklist trên:
 
-Sự cố C — tin header client
-  Code đọc quyền từ req.headers['x-user-role'] thay vì từ claim đã verify.
-  Attacker chỉ cần gửi `X-User-Role: admin`.
-```
+- **`alg:none`** — quên allowlist → thư viện "tôn trọng" token không chữ ký, token giả được chấp nhận.
+- **Quên `aud`** — service `admin` chấp nhận token cấp cho `billing`, user thường leo được vào API admin.
+- **Tin header client** — code đọc `X-User-Role` thay vì claim đã verify → attacker chỉ cần đặt header.
 
-Cả ba đều "verify được signature" trên jwt.io, đều "có code auth", nhưng đều thủng. Bài học: verify JWT là một **danh sách kiểm bắt buộc**, không phải một lời gọi hàm duy nhất. Doc này dựng tầng auth cho REST API theo nguyên tắc rõ ràng: **authenticate** (bạn là ai — verify token) tách bạch khỏi **authorize** (bạn được làm gì — kiểm scope/role).
+Doc này đi theo checklist đó, và tách rõ hai tầng: **authenticate** (bạn là ai — verify token) độc lập với **authorize** (bạn được làm gì — kiểm scope/role). Tách bạch này là gốc rễ của việc trả đúng mã 401 vs 403.
 
 ---
 

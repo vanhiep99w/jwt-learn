@@ -7,7 +7,7 @@ description: "Mổ xẻ 3 claim định danh cốt lõi của JWT — sub (token
 
 ## Mục lục
 
-- [Câu chuyện mở đầu: token của service A dùng được cho service B](#1-câu-chuyện-mở-đầu-token-của-service-a-dùng-được-cho-service-b)
+- [Token của service A dùng được cho service B — vì sao?](#1-token-của-service-a-dùng-được-cho-service-b--vì-sao)
 - [Ba claim định danh — ai, của ai, cho ai](#2-ba-claim-định-danh--ai-của-ai-cho-ai)
 - [sub — Subject: token này là của ai](#3-sub--subject-token-này-là-của-ai)
 - [iss — Issuer: ai phát hành token này](#4-iss--issuer-ai-phát-hành-token-này)
@@ -21,46 +21,14 @@ description: "Mổ xẻ 3 claim định danh cốt lõi của JWT — sub (token
 
 ---
 
-## 1. Câu chuyện mở đầu: token của service A dùng được cho service B
+## 1. Token của service A dùng được cho service B — vì sao?
 
-Bạn vận hành một nền tảng có hai service riêng biệt: **Blog** (đọc blog, ít nhạy cảm) và **Wallet** (ví tiền, cực nhạy cảm). Cả hai cùng dùng một auth server, cùng verify token bằng cùng một key.
+Một hệ thống có nhiều service dùng chung auth server và cùng key verify — ví dụ Blog và Wallet. Token được cấp riêng cho Blog (có `aud="blog-service"`), nhưng lại gọi được API của Wallet. Lý do: Wallet verify chữ ký đúng, check `exp` và `sub` đầy đủ, nhưng **không check `aud`** — nó không hề hỏi *"token này có thực sự dành cho mình không?"*. Token Blog biến thành chìa khoá mở được cả Wallet.
 
-Một ngày, bug bounty report một lỗ hổng nguy hiểm:
-
-```text
-Từ: security@bugbounty.com
-Tiêu đề: Cross-service token reuse — HIGH severity
-
-- Tôi đăng nhập Blog, nhận access token
-- Token này ghi: sub=user_123, aud="blog-service"
-- Tôi lấy CÙNG token đó gọi API Wallet:
-   POST /wallet/api/transfer
-   Authorization: Bearer <blog-token>
-- Wallet Service: verify chữ ký ✓ → xử lý chuyển tiền ✓
-
-Vì sao? Wallet KHÔNG check aud.
-```
-
-Token **dành cho Blog** lại dùng được cho Wallet. Kẻ tấn công chỉ cần đăng nhập Blog (đ dễ, có thể là public read) → nhận token → dùng token đó gọi Wallet (rút tiền). Lỗ hổng này tồn tại vì **Wallet verify chữ ký nhưng không check `aud`** — không hỏi *"token này có thực sự dành cho mình không?"*.
-
-```diagram
-   User đăng nhập Blog → nhận token (aud="blog-service")
-                                 │
-                                 ▼
-   User lấy token gọi Wallet:
-   ┌──────────────────────────────────────────────┐
-   │ Wallet Service:                              │
-   │  1. Verify chữ ký ✓                          │
-   │  2. Check exp ✓                              │
-   │  3. Check sub ✓                              │
-   │  4. Check aud? → KHÔNG CHECK!                │  ← LỖ HỔNG
-   │  → xử lý chuyển tiền                         │
-   └──────────────────────────────────────────────┘
-   💀 Token Blog dùng được cho Wallet
-```
+Đó là **cross-service token reuse** — lỗ hổng điển hình khi `aud` (audience) và `iss` (issuer) bị bỏ qua khi verify. Token vốn dành cho mục đích hẹp lại mở được service khác, phá vỡ ranh giới giữa các service.
 
 > [!IMPORTANT]
-> `aud` (audience) và `iss` (issuer) là hai claim bị bỏ qua nhiều nhất — và là nguồn gốc của lỗ hổng **cross-service token reuse**. Verify chữ ký đúng chưa đủ; phải check token **dành cho service này** (aud) và **do đúng issuer phát hành** (iss). Doc này mổ xẻ 3 claim định danh cốt lõi — `sub`, `iss`, `aud` — và vì sao thiếu một trong ba là mở cửa cho tấn công.
+> Verify chữ ký đúng chưa đủ; phải check token **dành cho service này** (`aud`) và **do đúng issuer phát hành** (`iss`). Đây là hai claim hay bị skip nhất — và là nguồn gốc của đa số lỗ hổng cross-service. Phần sau mổ xẻ chi tiết 3 claim định danh cốt lõi: `sub`, `iss`, `aud`.
 
 ---
 

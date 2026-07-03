@@ -7,7 +7,7 @@ description: "API Gateway như biên xác thực siêu chi tiết: vì sao verif
 
 ## Mục lục
 
-- [1. Bối cảnh: cửa khóa nhưng cửa sổ mở](#1-bối-cảnh-cửa-khóa-nhưng-cửa-sổ-mở)
+- [1. Gateway verify JWT xong — rồi truyền danh tính cho service thế nào?](#1-gateway-verify-jwt-xong--rồi-truyền-danh-tính-cho-service-thế-nào)
 - [2. Tổng quan: gateway là biên tin cậy](#2-tổng-quan-gateway-là-biên-tin-cậy)
 - [3. Vì sao verify ở gateway](#3-vì-sao-verify-ở-gateway)
 - [4. Mô hình tiêm header an toàn](#4-mô-hình-tiêm-header-an-toàn)
@@ -29,25 +29,24 @@ description: "API Gateway như biên xác thực siêu chi tiết: vì sao verif
 
 ---
 
-## 1. Bối cảnh: cửa khóa nhưng cửa sổ mở
+## 1. Gateway verify JWT xong — rồi truyền danh tính cho service thế nào?
 
-Một công ty đặt API Gateway verify JWT cho toàn bộ traffic vào. Gateway verify xong sẽ **tiêm** header `X-User-Id`, `X-User-Role` để các service phía sau dùng cho tiện (khỏi parse token). Nghe rất hợp lý. Nhưng cấu hình bỏ sót một dòng: gateway **không xóa** các header `X-User-*` mà client gửi lên trước khi tiêm.
+Một bài toán dev rất quen thuộc: đặt API Gateway verify JWT cho toàn bộ traffic, gateway xác thực xong thì truyền danh tính của user (id, role, scope…) xuống cho các service phía sau. Mục đích là để service khỏi tự parse và verify token lại — gateway đã lo, service chỉ cần biết "ai đang gọi".
+
+Nghe đơn giản, nhưng câu hỏi "truyền bằng cách nào" có **đúng một cách an toàn và nhiều cách sai**. Cách phổ biến nhất là tiêm (inject) header: gateway thêm các header như `X-User-Id`, `X-User-Role` vào request rồi chuyển xuống backend.
 
 ```text
-Client gửi:
-  GET /api/admin/users
-  Authorization: Bearer <token-user-thường>
-  X-User-Role: admin          ← client tự đặt!
-
-Gateway verify token (user thường, role=user) → OK, cho qua
-Gateway tiêm X-User-Role: user  ... NHƯNG header X-User-Role: admin của client VẪN CÒN
-Service phía sau đọc X-User-Role → thấy "admin" (giá trị nào?) → cho quyền admin
+Client → Gateway                              → Service
+  Authorization: Bearer <jwt>                   X-User-Id: user-42
+                                                X-User-Role: user     ← gateway tiêm từ claim đã verify
 ```
 
-Tùy thứ tự header và cách service đọc, giá trị client gửi có thể "thắng" giá trị gateway tiêm — và một user thường trở thành admin. Gateway verify token *đúng*, nhưng quên rằng **client có thể giả mạo chính những header mà gateway dùng để giao tiếp với backend**.
+Vấn đề nằm ở một chi tiết nhỏ mà nhiều cấu hình bỏ sót: **header có thể do client tự đặt**. Nếu gateway nhận header `X-User-Role` từ client, verify token xong rồi *tiêm thêm* header cùng tên mà không xóa cái cũ đi, thì backend sẽ thấy hai header trùng tên — và tùy framework đọc cái nào. Một user thường tự đặt `X-User-Role: admin` có thể thành admin mà không cần đụng tới token. Gateway verify token *đúng*, nhưng vô tình để lọt chính những header mà nó dùng để giao tiếp với backend.
+
+Bài toán của doc này không phải "có nên verify ở gateway không" (có), mà là **verify xong rồi truyền xuống thế nào cho an toàn**, kèm cấu hình cụ thể trên các nền tảng phổ biến.
 
 > [!IMPORTANT]
-> API Gateway là điểm vào tập trung của hệ thống. Đặt xác thực ở đây giúp chuẩn hóa và giảm tải cho service phía sau, nhưng kéo theo một trách nhiệm sống còn: **luôn xóa (strip) các header danh tính do client gửi TRƯỚC, rồi mới tiêm header từ claim đã verify**. Quên bước strip = mở toang cửa cho giả mạo. Doc này đi sâu vào mô hình tiêm header an toàn và cấu hình cụ thể từng nền tảng.
+> Quy tắc xương sống: **strip** mọi header danh tính client gửi TRƯỚC, **verify** token, rồi mới **tiêm** header từ claim đã verify SAU. Ba bước, đúng thứ tự, không được đảo. Quên bước strip = mở toang cửa cho giả mạo — đó cũng là anti-pattern kinh điển được nhắc lại ở mục 10.
 
 ---
 

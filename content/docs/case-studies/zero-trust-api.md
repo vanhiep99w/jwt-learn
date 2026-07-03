@@ -7,7 +7,7 @@ description: "Thiết kế API theo mô hình zero trust — không tin mạng n
 
 ## Mục lục
 
-- [Bối cảnh: bị tấn công từ bên trong](#1-bối-cảnh-bị-tấn-công-từ-bên-trong)
+- [Castle-and-moat: cửa chính thép, cửa sổ mở toang](#1-castle-and-moat-cửa-chính-thép-cửa-sổ-mở-toang)
 - [Zero Trust là gì — lật ngược tư duy "mạng nội bộ an toàn"](#2-zero-trust-là-gì--lật-ngược-tư-duy-mạng-nội-bộ-an-toàn)
 - [Vấn đề: trong cụm microservices, JWT thường bị lười verify](#3-vấn-đề-trong-cụm-microservices-jwt-thường-bị-lười-verify)
 - [Nguyên tắc 1: Verify ở mỗi hop, không chỉ ở edge](#4-nguyên-tắc-1-verify-ở-mỗi-hop-không-chỉ-ở-edge)
@@ -24,29 +24,11 @@ description: "Thiết kế API theo mô hình zero trust — không tin mạng n
 
 ---
 
-## 1. Bối cảnh: bị tấn công từ bên trong
+## 1. Castle-and-moat: cửa chính thép, cửa sổ mở toang
 
-Bạn vận hành một cụm microservices lớn — API Gateway ở tiền tuyến, sau đó là hàng chục service nội bộ: Order, Payment, Inventory, Notification... Mọi service đều nằm trong **mạng nội bộ** (VPC private), chỉ gateway mới lộ ra Internet.
+Trong cụm microservices, service A có nên tin service B chỉ vì cả hai cùng nằm trong một VPC? Câu hỏi này là gốc rễ của mọi thiết kế bảo mật hiện đại — và phần lớn hệ thống vẫn trả lời **sai**.
 
-Một ngày, incident response báo động:
-
-```text
-SEV-1: Bất thường ở Payment Service
-
-- 23:14: kẻ tấn công đã chạy được code trên Notification Service (lỗ hổng RCE)
-- 23:15: từ Notification, gọi thẳng Payment Service (internal endpoint)
-         POST http://payment.internal/api/payout
-         Body: { "amount": 999999, "to": "attacker-account" }
-- 23:15: Payment Service xử lý → chuyển 999,999$ đi
-
-Vì sao Payment Service chịu?
-- Gateway verify JWT kỹ — nhưng gateway KHÔNG trong luồng này
-- Notification → Payment gọi trực tiếp (mạng nội bộ)
-- Payment "tin" mọi request từ mạng nội bộ (không verify lại)
-- → Kẻ tấn công đã dùng Notification làm "bước đệm" (pivot) vào Payment
-```
-
-Đây là vết thương kinh điển của mô hình **trust-the-network**: tiền tuyến (gateway) cố thủ như thành trì, nhưng mạng nội bộ là "vùng tin tưởng" — service A gọi service B thì B tin ngay, không hỏi. Khi kẻ tấn công chiếm được **bất kỳ service nào**, họ có quyền của cả cụm.
+Kiểu trả lời sai mang tên **castle-and-moat** (thành trì + hào nước): tiền tuyến cố thủ như thành trì, nhưng bên trong là "vùng tin tưởng" — service A gọi service B thì B tin ngay, không hỏi. Mô hình này hợp thời ở kỷ nguyên mạng nội bộ khép kín, nhưng trong cụm microservices nó trở thành cửa chính bằng thép, cửa sổ mở toang.
 
 ```diagram
    Mô hình castle-and-moat (cũ — nguy hiểm):
@@ -68,8 +50,10 @@ Vì sao Payment Service chịu?
    ╚════════════════════════════════════════════╝
 ```
 
+Hậu quả thực tế rất cụ thể: khi kẻ tấn công chiếm được **một service yếu nhất** (thường là service ít để ý — notification, logging), họ có quyền của cả cụm. Từ "notification" làm bước đệm (pivot), gọi thẳng payment. Phòng tuyến "chỉ gateway verify" thì đã bị vòng qua rồi. (Chi tiết kịch bản pivot này nằm ở section Threat model — phần sau.)
+
 > [!IMPORTANT]
-> Mô hình "castle-and-moat" (thành trì + hào nước) đã lỗi thời. Trong cụm microservices, kẻ tấn công chỉ cần chiếm **một service yếu nhất** (thường là service ít được để ý — notification, logging) để làm bước đệm, rồi tấn công service giá trị cao (payment, auth). Phòng tuyến "chỉ gateway verify" giống cửa chính bằng thép nhưng cửa sổ mở toang. **Zero Trust** sinh ra để giải quyết: không "vùng tin cậy", verify ở **mọi hop**.
+> Castle-and-moat đã lỗi thời. Kẻ tấn công chỉ cần một điểm yếu nhỏ để làm bàn đạp, rồi tấn công service giá trị cao. **Zero Trust** sinh ra để giải quyết: không "vùng tin cậy", verify ở **mọi hop** — kể cả khi request đến từ mạng nội bộ, kể cả khi gọi đến service "cùng nhà".
 
 ---
 
