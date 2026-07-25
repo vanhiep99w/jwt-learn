@@ -6,9 +6,17 @@
   --fd-font-mono: 'JetBrains Mono', monospace;
 }
 
-/* Wider content area */
-#nd-page article {
-  max-width: none;
+/* Use the full desktop viewport instead of centering the docs in a 97rem grid. */
+@media (min-width: 80rem) {
+  #nd-docs-layout {
+    --fd-layout-width: 100vw;
+  }
+
+  #nd-page {
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 1rem;
+  }
 }
 
 /* Vietnamese text readability */
