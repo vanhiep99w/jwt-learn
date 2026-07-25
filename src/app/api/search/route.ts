@@ -1,18 +1,5 @@
 import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
 
-const { staticGET: GET } = createFromSource(source, (page) => ({
-  title: page.data.title,
-  description: page.data.description,
-  url: page.url,
-  id: page.url,
-  structuredData: {
-    headings: page.data.structuredData.headings,
-    contents: [],
-  },
-}));
-
-export { GET };
-
-// Required for Next.js static export
-export const dynamic = 'force-static';
+export const revalidate = false;
+export const { staticGET: GET } = createFromSource(source);

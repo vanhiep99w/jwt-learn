@@ -1,6 +1,6 @@
 # JWT Learn
 
-Tài liệu học JSON Web Token tiếng Việt từ cơ bản đến chuyên sâu, xây dựng bằng Next.js 15 + Fumadocs và deploy lên Cloudflare Pages.
+Tài liệu học JSON Web Token tiếng Việt từ cơ bản đến chuyên sâu, xây dựng bằng Next.js 16 + Fumadocs và deploy lên Cloudflare Pages.
 
 ## Development
 

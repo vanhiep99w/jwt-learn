@@ -97,5 +97,12 @@ export const docs = defineDocs({
 export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkCallouts, remarkMermaid],
+    rehypeCodeOptions: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+      fallbackLanguage: 'text',
+    },
   },
 });
